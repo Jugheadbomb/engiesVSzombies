@@ -1,0 +1,93 @@
+"Games"
+{
+	"tf"
+	{
+		"Offsets"
+		{
+			"CBaseEntity::ShouldTransmit"
+			{
+				"linux"			"19"
+				"windows"		"18"
+			}
+			"CBaseObject::CanBeUpgraded"
+			{
+				"linux"		"380"
+				"windows"	"379"
+			}
+		}
+		"Signatures"
+		{
+			"CTFWeaponBaseMelee::DoSwingTraceInternal"
+			{
+				"library"		"server"
+				"linux"			"@_ZN18CTFWeaponBaseMelee20DoSwingTraceInternalER10CGameTracebP10CUtlVectorIS0_10CUtlMemoryIS0_iEE"
+				"windows"		"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x81\xEC\x38\x05\x00\x00\xA1\x2A\x2A\x2A\x2A"
+			}
+			"CTFPlayer::TeamFortress_SetSpeed"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x1C\x53"
+			}
+			"CTFPlayer::PlayTauntSceneFromItem"
+			{
+				"library"	"server"
+				"linux"		"@_ZN9CTFPlayer22PlayTauntSceneFromItemEPK13CEconItemView"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x0C\x01\x00\x00\x53\x8B\x5D\x08\x57\x8B"
+			}
+		}
+		"Functions"
+		{
+			"CBaseEntity::ShouldTransmit"
+			{
+				"offset"		"CBaseEntity::ShouldTransmit"
+				"hooktype"		"entity"
+				"return"		"int"
+				"this"			"entity"
+				"arguments"
+				{
+					"pTransmitInfo"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+			"CBaseObject::CanBeUpgraded"
+			{
+				"offset"		"CBaseObject::CanBeUpgraded"
+				"hooktype"		"entity"
+				"return"		"bool"
+				"this"			"entity"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CTFWeaponBaseMelee::DoSwingTraceInternal"
+			{
+				"signature"		"CTFWeaponBaseMelee::DoSwingTraceInternal"
+				"callconv"		"thiscall"
+				"return"		"bool"
+				"this"			"entity"
+				"arguments"
+				{
+					"trace"
+					{
+						"type"	"objectptr"
+					}
+					"bCleave"
+					{
+						"type"	"bool"
+					}
+					"pTargetTraceVector"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+		}
+	}
+}

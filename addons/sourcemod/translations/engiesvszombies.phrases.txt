@@ -1,0 +1,451 @@
+"Phrases"
+{
+	// Chat messages
+	"Chat_WelcomeMessage"
+	{
+		"en"		"{immortal}[{darkorange}EVZ{immortal}] Welcome to Engineers VS Zombies!\nType {darkorange}!evz{immortal} for more info."
+		"ru"		"{immortal}[{darkorange}EVZ{immortal}] Добро пожаловать в Engineers VS Zombies!\nВведите {darkorange}!evz{immortal} для большей информации."
+	}
+	"Chat_ImbalancedRound"
+	{
+		"#format"	"{1:s}" // {red} or {green}
+		"en"		"{1}Zombies have received extra health to ensure game balance at the start of the round."
+		"ru"		"{1}Зомби получили дополнительное здоровье для обеспечения игрового баланса в начале раунда."
+	}
+	"Chat_ForceZombieStart"
+	{
+		"en"		"{red}You have been forcibly set to Infected team due to attempting to skip playing as a infected."
+		"ru"		"{red}Вы были принудительно перемещены в команду зомби из-за попытки пропустить игру за зараженного."
+	}
+	"Chat_KillComboCritCharged"
+	{
+		"en"		"{immortal}Crit punch is charged! Next attack from this weapon will be {darkorange}critical{immortal}."
+		"ru"		"{immortal}Критический удар заряжен! Следующая атака с этого оружия будет {darkorange}критической{immortal}."
+	}
+	"Chat_NoActiveRound"
+	{
+		"en"		"{red}No active round"
+		"ru"		"{red}Нет активного раунда"
+	}
+
+	// Jointeam chat messages
+	"Chat_CantSwitchSetup"
+	{
+		"en"		"{red}You can not switch to the opposing team during setup."
+		"ru"		"{red}Вы не можете переключиться на команду соперника во время подготовки."
+	}
+	"Chat_WillJoinZombieSetup"
+	{
+		"en"		"{red}You will join the Infected team when setup period ends."
+		"ru"		"{red}По окончании подготовки вы присоединитесь к команде зараженных."
+	}
+	"Chat_CancelSetupEnd"
+	{
+		"en"		"{green}You will no longer automatically join the Infected team when setup period ends."
+		"ru"		"{green}Вы больше не будете автоматически присоединяться к команде зараженных по окончании подготовки."
+	}
+	"Chat_CantJoinDuringSetup"
+	{
+		"en"		"{red}Can not join the Survivor team at this time. You will join the Infected team when setup period ends."
+		"ru"		"{red}В настоящее время нельзя присоединиться к команде выживших. По окончании подготовки вы присоединитесь к команде зараженных."
+	}
+
+	// HUD messages
+	"Hud_ZombiesReleased"
+	{
+		"en"		"Zombies are released!"
+		"ru"		"Зомби освобождены!"
+	}
+	"Hud_ZombiesBoosted"
+	{
+		"en"		"Zombies perma-boosted"
+		"ru"		"Зомби усилены"
+	}
+	"Hud_ZombieSpawnArea"
+	{
+		"en"		"WARNING: Zombies are ubered in respawn room"
+		"ru"		"ВНИМАНИЕ: Зомби неуязвимы в зоне возрождения"
+	}
+	"Hud_BonusRound"
+	{
+		"en"		"Bonus round"
+		"ru"		"Бонусный раунд"
+	}
+
+	// Menu
+	"Menu_MainTitle"
+	{
+		"en"		"Engineers VS Zombies"
+	}
+	"Menu_MainOverview"
+	{
+		"en"		"Overview"
+		"ru"		"Обзор"
+	}
+	"Menu_MainTeamSurvivor"
+	{
+		"en"		"Team: Survivors"
+		"ru"		"Команда: Выжившие"
+	}
+	"Menu_MainTeamZombie"
+	{
+		"en"		"Team: Zombies"
+		"ru"		"Команда: Зомби"
+	}
+	"Menu_MainBalances"
+	{
+		"en"		"Weapon balances"
+		"ru"		"Балансы оружий"
+	}
+	"Menu_MainBonusRounds"
+	{
+		"en"		"Bonus rounds"
+		"ru"		"Бонусные раунды"
+	}
+	"Menu_MainBack"
+	{
+		"en"		"<- Back"
+		"ru"		"<- Назад"
+	}
+	"Menu_CurrentRound"
+	{
+		"en"		"Current round"
+		"ru"		"Текущий раунд"
+	}
+	"Menu_None"
+	{
+		"en"		"None"
+		"ru"		"Нет"
+	}
+
+	"Menu_Overview"
+	{
+		"en"		"Survivors must survive the endless attack of Zombies.\nZombies need to work together to take down the survivors.\nRound ends when all survivors became zombie or timer ended."
+		"ru"		"Выжившие должны выжить в бесконечной атаке зараженных.\nЗомби должны работать вместе, чтобы уничтожить выживших.\nРаунд завершается, когда все выжившие заражены или закончился таймер."
+	}
+	"Menu_TeamSurvivor"
+	{
+		"en"		"Survivors play as Engineers.\nThey can build only dispensers and teleporters (there are exceptions)."
+		"ru"		"Выжившие играют за Инженеров.\nОни могут строить только раздатчики и телепорты (есть исключения)."
+	}
+	"Menu_TeamZombie"
+	{
+		"en"		"Zombies play as Medics (Melee only).\nThey have double jump.\nThey gain boost when round timer hits 1 minute."
+		"ru"		"Зомби играют за Медиков (Только ближний бой).\nОни могут делать двойной прыжок.\nОни получают улучшения, когда таймер достигает 1 минуты."
+	}
+
+	// Chat/Menu
+	"Weapon_FrontierJustice"
+	{
+		"en"		"Frontier Justice"
+		"ru"		"Самосуд"
+	}
+	"Weapon_FrontierJustice_Desc"
+	{
+		"en"		"{green}Reload speed: +50%%, Ammo count: +10"
+		"ru"		"{green}Скорость перезарядки: +50%%, Кол-во патрон: +10"
+	}
+
+	"Weapon_Widowmaker"
+	{
+		"en"		"Widowmaker"
+		"ru"		"Овдовитель"
+	}
+	"Weapon_Widowmaker_Desc"
+	{
+		"en"		"{red}Metal consumption: +10"
+		"ru"		"{red}Потребление металла: +10"
+	}
+
+	"Weapon_Pomson"
+	{
+		"en"		"Pomson 6000"
+		"ru"		"Помсон 6000"
+	}
+	"Weapon_Pomson_Desc"
+	{
+		"en"		"{green}Reload speed: +10%%, Attack speed: +40%%"
+		"ru"		"{green}Скорость перезарядки: +10%%, Скорость атаки: +40%%"
+	}
+
+	"Weapon_RescueRanger"
+	{
+		"en"		"Rescue Ranger"
+		"ru"		"Спасатель"
+	}
+	"Weapon_RescueRanger_Desc"
+	{
+		"en"		"{green}Mini-sentry, {red}Damage: -40%%, Sentry radius: -35%%, Sentry damage: -50%%, Sentry attack speed: -40%%"
+		"ru"		"{green}Мини-турель, {red}Урон: -40%%, Радиус турели: -35%%, Урон турели: -50%%, Скорость атаки турели: -40%%"
+	}
+
+	"Weapon_PanicAttack"
+	{
+		"en"		"Panic Attack"
+		"ru"		"Паническая атака"
+	}
+	"Weapon_PanicAttack_Desc"
+	{
+		"en"		"{green}Reload speed: +30%%, No accuracy falloff, {red}Deploy time: +50%%"
+		"ru"		"{green}Скорость перезарядки: +30%%, Нет увеличения разброса, {red}Достается на 50%% медленнее"
+	}
+
+	"Weapon_Pistol"
+	{
+		"en"		"Pistol"
+		"ru"		"Пистолет"
+	}
+	"Weapon_Pistol_Desc"
+	{
+		"en"		"{red}Ammo count: -82%%"
+		"ru"		"{red}Запас патронов: -82%%"
+	}
+
+	"Weapon_ShortCircuit"
+	{
+		"en"		"Short Circuit"
+		"ru"		"Короткое замыкание"
+	}
+	"Weapon_ShortCircuit_Desc"
+	{
+		"en"		"{green}Damage: +100%%, {red}Secondary attack is disabled"
+		"ru"		"{green}Урон: +100%%, {red}Доп. атака отключена"
+	}
+
+	"Weapon_Wrangler"
+	{
+		"en"		"Wrangler"
+		"ru"		"Поводырь"
+	}
+	"Weapon_Wrangler_Desc"
+	{
+		"en"		"{gray}When active: {green}10%% move speed bonus and 35%% damage resistance, {red}Deploy time: +75%%"
+		"ru"		"{gray}Когда активен: {green}+10%% скорости передвижения и 35%% сопротивления урону, {red}Достаётся на 75%% медленнее"
+	}
+
+	"Weapon_Wrench"
+	{
+		"en"		"All wrenches"
+		"ru"		"Все ключи"
+	}
+	"Weapon_Wrench_Desc"
+	{
+		"en"		"{green}Max HP level: +25 points"
+		"ru"		"{green}Уровень здоровья: +25 ед"
+	}
+
+	"Weapon_SouthernHospitality"
+	{
+		"en"		"Southern Hospitality"
+		"ru"		"Южное гостеприимство"
+	}
+	"Weapon_SouthernHospitality_Desc"
+	{
+		"en"		"{red}Attack speed: -15%%"
+		"ru"		"{red}Скорость атаки: -15%%"
+	}
+
+	"Weapon_EurekaEffect"
+	{
+		"en"		"Eureka Effect"
+		"ru"		"Озарение"
+	}
+	"Weapon_EurekaEffect_Desc"
+	{
+		"en"		"{green}Metal regeneration: +10, {red}Teleportation is disabled"
+		"ru"		"{green}Регенерация металла: +10, {red}Телепортация отключена"
+	}
+
+	"Weapon_Gunslinger"
+	{
+		"en"		"Gunslinger"
+		"ru"		"Оружейник"
+	}
+	"Weapon_Gunslinger_Desc"
+	{
+		"en"		"{green}Guaranteed crit after 2 punch-kills, {red}No guaranteed crit from third punch"
+		"ru"		"{green}Гарантированный крит после 2 убийств, {red}Нет гарантированного крита на 3-й удар"
+	}
+
+	"Weapon_Ubersaw"
+	{
+		"en"		"Ubersaw"
+		"ru"		"Убер-пила"
+	}
+	"Weapon_Ubersaw_Desc"
+	{
+		"en"		"{green}Health regen on hit: +10"
+		"ru"		"{green}Восстановление здоровья при ударе: +10"
+	}
+
+	"Weapon_Vitasaw"
+	{
+		"en"		"Vitasaw"
+		"ru"		"Вита-пила"
+	}
+	"Weapon_Vitasaw_Desc"
+	{
+		"en"		"{green}Damage vs buildings: +15%%, {red}Max HP level: -20 points"
+		"ru"		"{green}Урон по постройкам: +15%%, {red}Уровень здоровья: -20 ед"
+	}
+
+	"Weapon_SolemnVow"
+	{
+		"en"		"Solemn Vow"
+		"ru"		"Священная клятва"
+	}
+	"Weapon_SolemnVow_Desc"
+	{
+		"en"		"{green}Knockback resistance: +50%%"
+		"ru"		"{green}Сопротивление отталкиванию: +50%%"
+	}
+
+	// Bonus rounds
+	"BonusRound_LowGravity"
+	{
+		"en"		"Low gravity"
+		"ru"		"Низкая гравитация"
+	}
+	"BonusRound_LowGravity_Desc"
+	{
+		"en"		"Feel like you're on the Moon"
+		"ru"		"Почувствуйте себя на луне"
+	}
+
+	"BonusRound_CuriousFeeling"
+	{
+		"en"		"Curious feeling"
+		"ru"		"Любопытное чувство"
+	}
+	"BonusRound_CuriousFeeling_Desc"
+	{
+		"en"		"Feel a little cartoony"
+		"ru"		"Почувствуйте немного мультяшности"
+	}
+
+	"BonusRound_NoDispensers"
+	{
+		"en"		"No dispensers"
+		"ru"		"Без раздатчиков"
+	}
+	"BonusRound_NoDispensers_Desc"
+	{
+		"en"		"Dispensers are disabled, health regen instead"
+		"ru"		"Раздатчики отключены, вместо них регенерация здоровья"
+	}
+
+	"BonusRound_EarlyOutbreak"
+	{
+		"en"		"Early outbreak"
+		"ru"		"Раннее заражение"
+	}
+	"BonusRound_EarlyOutbreak_Desc"
+	{
+		"en"		"Zombies will be released instantly"
+		"ru"		"Зомби будут освобождены моментально"
+	}
+
+	"BonusRound_MurderousJoy"
+	{
+		"en"		"Murderous joy"
+		"ru"		"Убийственная радость"
+	}
+	"BonusRound_MurderousJoy_Desc"
+	{
+		"en"		"Upon killing, the killer is forced to laugh"
+		"ru"		"Убийцу охватывает приступ злорадства"
+	}
+
+	"BonusRound_KevlarVests"
+	{
+		"en"		"Kevlar vests"
+		"ru"		"Кевларовые жилеты"
+	}
+	"BonusRound_KevlarVests_Desc"
+	{
+		"en"		"Survivors can now survive one lethal hit!"
+		"ru"		"Выжившие теперь могут пережить один летальный удар!"
+	}
+	"Chat_KevlarUsed"
+	{
+		"en"		"{immortal}You have survived only one lethal hit!"
+		"ru"		"{immortal}Вы пережили единственный летальный удар!"
+	}
+
+	"BonusRound_DoubleDilemma"
+	{
+		"en"		"Double dilemma"
+		"ru"		"Двойная дилемма"
+	}
+	"BonusRound_DoubleDilemma_Desc"
+	{
+		"en"		"Survivors lose teleporters for a double jump"
+		"ru"		"Выжившие теряют телепорты в обмен на двойной прыжок"
+	}
+
+	"BonusRound_HighGravity"
+	{
+		"en"		"High gravity"
+		"ru"		"Высокая гравитация"
+	}
+	"BonusRound_HighGravity_Desc"
+	{
+		"en"		"The force of gravity weighs you down!"
+		"ru"		"Сила гравитации тянет вас вниз!"
+	}
+
+	"BonusRound_MeleeBattle"
+	{
+		"en"		"Melee battle"
+		"ru"		"Рукопашный бой"
+	}
+	"BonusRound_MeleeBattle_Desc"
+	{
+		"en"		"Melee weapons only"
+		"ru"		"Только оружие ближнего боя"
+	}
+
+	"BonusRound_RandomFits"
+	{
+		"en"		"Random fits"
+		"ru"		"Случайные совпадения"
+	}
+	"BonusRound_RandomFits_Desc"
+	{
+		"en"		"Random crits are now enabled! Watch out!"
+		"ru"		"Случайные криты теперь включены! Будьте осторожны!"
+	}
+
+	"BonusRound_HotPotato"
+	{
+		"en"		"Hot potato"
+		"ru"		"Горячая картошка"
+	}
+	"BonusRound_HotPotato_Desc"
+	{
+		"en"		"Move or die!"
+		"ru"		"Двигайся или умри!"
+	}
+
+	"BonusRound_NoUpgrades"
+	{
+		"en"		"No upgrades"
+		"ru"		"Без улучшений"
+	}
+	"BonusRound_NoUpgrades_Desc"
+	{
+		"en"		"Only level one buildings"
+		"ru"		"Постройки только 1-го уровня"
+	}
+
+	"BonusRound_TeamSwap"
+	{
+		"en"		"Team swap"
+		"ru"		"Смена команд"
+	}
+	"BonusRound_TeamSwap_Desc"
+	{
+		"en"		"Team colors are swapped"
+		"ru"		"Цвета команд меняются местами"
+	}
+}

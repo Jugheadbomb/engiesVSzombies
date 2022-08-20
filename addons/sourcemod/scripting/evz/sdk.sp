@@ -1,0 +1,139 @@
+static Handle g_hSDKEquipWearable;
+static Handle g_hSDKSetSpeed;
+static Handle g_hSDKPlayTauntScene;
+static DynamicHook g_DHookShouldTransmit;
+static DynamicHook g_DHookCanBeUpgraded;
+static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
+
+void SDK_Init()
+{
+	GameData hGameData = new GameData("sm-tf2.games");
+	if (!hGameData)
+		SetFailState("Could not find sm-tf2.games.txt gamedata!");
+
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetVirtual(hGameData.GetOffset("RemoveWearable") - 1);
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	if (!(g_hSDKEquipWearable = EndPrepSDKCall()))
+		LogError("Failed to create call: CBasePlayer::EquipWearable!");
+
+	hGameData = new GameData("evz");
+	if (!hGameData)
+		SetFailState("Could not find evz.txt gamedata!");
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
+	g_hSDKSetSpeed = EndPrepSDKCall();
+	if (!(g_hSDKSetSpeed = EndPrepSDKCall()))
+		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
+
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::PlayTauntSceneFromItem");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+	if (!(g_hSDKPlayTauntScene = EndPrepSDKCall()))
+		LogError("Failed to create call: CTFPlayer::PlayTauntSceneFromItem");
+
+	g_DHookShouldTransmit = DynamicHook.FromConf(hGameData, "CBaseEntity::ShouldTransmit");
+	g_DHookCanBeUpgraded = DynamicHook.FromConf(hGameData, "CBaseObject::CanBeUpgraded");
+	DynamicDetour.FromConf(hGameData, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Pre, DHook_DoSwingTraceInternalPre);
+	DynamicDetour.FromConf(hGameData, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Post, DHook_DoSwingTraceInternalPost);
+
+	delete hGameData;
+}
+
+void SDK_OnClientConnect(int iClient)
+{
+	g_DHookShouldTransmit.HookEntity(Hook_Post, iClient, DHook_ShouldTransmitPost);
+}
+
+void SDK_OnEntityCreated(int iEntity, const char[] sClassname)
+{
+	if (StrContains(sClassname, "obj_", false) == 0)
+		g_DHookCanBeUpgraded.HookEntity(Hook_Post, iEntity, DHook_CanBeUpgradedPost);
+}
+
+public MRESReturn DHook_ShouldTransmitPost(int iClient, DHookReturn ret, DHookParam params)
+{
+	if (GetEntProp(iClient, Prop_Send, "m_bGlowEnabled"))
+	{
+		ret.Value = FL_EDICT_ALWAYS;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam params)
+{
+	if (g_nBonusRound == BonusRound_NoUpgrades)
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)
+{
+	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
+		return MRES_Ignored;
+
+	// Enable MvM for this function for melee trace hack
+	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+
+	int iOwner = GetEntPropEnt(iMelee, Prop_Send, "m_hOwnerEntity");
+	TFTeam nOwnerTeam = TF2_GetClientTeam(iOwner);
+
+	for (int iClient = 1; iClient <= MaxClients; iClient++)
+	{
+		if (!IsClientInGame(iClient))
+			continue;
+
+		// Save current team for later
+		TFTeam nTeam = TF2_GetClientTeam(iClient);
+		g_nOldClientTeam[iClient] = nTeam;
+
+		// Melee trace ignores teammates for MvM invaders
+		// Move teammates to the BLU team and enemies to the RED team
+		SetEntProp(iClient, Prop_Data, "m_iTeamNum", nTeam == nOwnerTeam ? TFTeam_Blue : TFTeam_Red);
+	}
+
+	return MRES_Ignored;
+}
+
+public MRESReturn DHook_DoSwingTraceInternalPost(int iMelee, DHookReturn ret, DHookParam params)
+{
+	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
+		return MRES_Ignored;
+
+	// Disable MvM so there are no lingering effects
+	GameRules_SetProp("m_bPlayingMannVsMachine", false);
+
+	for (int iClient = 1; iClient <= MaxClients; iClient++)
+	{
+		if (!IsClientInGame(iClient))
+			continue;
+
+		// Restore client's previous team
+		SetEntProp(iClient, Prop_Data, "m_iTeamNum", g_nOldClientTeam[iClient]);
+	}
+
+	return MRES_Ignored;
+}
+
+void SDK_EquipWearable(int iClient, int iWearable)
+{
+	SDKCall(g_hSDKEquipWearable, iClient, iWearable);
+}
+
+void SDK_SetSpeed(int iClient)
+{
+	SDKCall(g_hSDKSetSpeed, iClient);
+}
+
+void SDK_PlayTauntSceneFromItem(int iClient, Address pEconItemView)
+{
+	SDKCall(g_hSDKPlayTauntScene, iClient, pEconItemView);
+}

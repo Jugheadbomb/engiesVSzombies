@@ -54,6 +54,13 @@ public void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcas
 		SetEntProp(iEntity, Prop_Data, "m_bSwitchTeamsOnWin", false);
 	}
 
+	iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_holiday");
+	if (iEntity > MaxClients)
+	{
+		SetVariantInt(0);
+		AcceptEntityInput(iEntity, "HalloweenSetUsingSpells");
+	}
+
 	if (g_nRoundState == EVZRoundState_Waiting)
 		return;
 

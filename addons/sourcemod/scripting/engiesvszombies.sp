@@ -655,14 +655,14 @@ public void Client_WeaponSwitchPost(int iClient, int iWeapon)
 
 public void Frame_CheckLogics()
 {
-	int iEntity = FindEntityByClassname(-1, "tf_logic_arena");
+	int iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_arena");
 	if (iEntity > MaxClients)
 	{
 		AcceptEntityInput(iEntity, "Kill");
 		GameRules_SetProp("m_nGameType", 0);
 	}
 
-	iEntity = FindEntityByClassname(-1, "tf_logic_koth");
+	iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_koth");
 	if (iEntity > MaxClients)
 	{
 		AcceptEntityInput(iEntity, "Kill");

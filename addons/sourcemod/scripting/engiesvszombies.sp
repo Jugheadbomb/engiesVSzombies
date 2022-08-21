@@ -171,6 +171,8 @@ public void OnConfigsExecuted()
 	CreateTimer(240.0, Timer_WelcomeMessage, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(1.0, Timer_Main, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	Plugin_Cvars(true);
+
+	RequestFrame(Frame_CheckLogics);
 }
 
 public void OnMapEnd()
@@ -211,9 +213,7 @@ public void OnClientDisconnect(int iClient)
 
 public void OnEntityCreated(int iEntity, const char[] sClassname)
 {
-	if (StrEqual(sClassname, "tf_logic_koth") || StrEqual(sClassname, "tf_logic_arena"))
-		RemoveEntity(iEntity);
-	else if (StrEqual(sClassname, "tf_dropped_weapon") || StrEqual(sClassname, "item_powerup_rune") || StrEqual(sClassname, "item_teamflag"))
+	if (StrEqual(sClassname, "tf_dropped_weapon") || StrEqual(sClassname, "item_powerup_rune") || StrEqual(sClassname, "item_teamflag"))
 		RemoveEntity(iEntity);
 	else if (StrEqual(sClassname, "team_control_point"))
 		SDKHook(iEntity, SDKHook_Spawn, Point_Spawn);
@@ -649,6 +649,23 @@ public void Client_WeaponSwitchPost(int iClient, int iWeapon)
 	}
 
 	iPreviousWeapon[iClient] = iWeapon;
+}
+
+public void Frame_CheckLogics()
+{
+	int iEntity = FindEntityByClassname(-1, "tf_logic_arena");
+	if (iEntity > MaxClients)
+	{
+		AcceptEntityInput(iEntity, "Kill");
+		GameRules_SetProp("m_nGameType", 0);
+	}
+
+	iEntity = FindEntityByClassname(-1, "tf_logic_koth");
+	if (iEntity > MaxClients)
+	{
+		AcceptEntityInput(iEntity, "Kill");
+		GameRules_SetProp("m_bPlayingKoth", false);
+	}
 }
 
 public void Frame_CreateRoundTimer()

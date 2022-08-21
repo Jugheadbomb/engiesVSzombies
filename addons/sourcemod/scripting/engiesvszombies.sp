@@ -213,7 +213,9 @@ public void OnClientDisconnect(int iClient)
 
 public void OnEntityCreated(int iEntity, const char[] sClassname)
 {
-	if (StrEqual(sClassname, "tf_dropped_weapon") || StrEqual(sClassname, "item_powerup_rune") || StrEqual(sClassname, "item_teamflag"))
+	if (StrEqual(sClassname, "tf_spell_pickup") || StrEqual(sClassname, "tf_dropped_weapon"))
+		RemoveEntity(iEntity);
+	else if (StrEqual(sClassname, "item_powerup_rune") || StrEqual(sClassname, "item_teamflag"))
 		RemoveEntity(iEntity);
 	else if (StrEqual(sClassname, "team_control_point"))
 		SDKHook(iEntity, SDKHook_Spawn, Point_Spawn);

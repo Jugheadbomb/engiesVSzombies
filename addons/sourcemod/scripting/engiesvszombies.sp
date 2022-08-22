@@ -14,6 +14,7 @@
 #include "include/evz.inc"
 
 #define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION_REVISION "manual"
 
 #define TF_MAXPLAYERS 34
 
@@ -85,8 +86,8 @@ public Plugin myinfo =
 	name = "[TF2] Engineers VS Zombies",
 	author = "Jughead",	
 	description = "Zombie Survival Gamemode for TF2",
-	version = PLUGIN_VERSION,
-	url = "https://steamcommunity.com/profiles/76561198241665788"
+	version = PLUGIN_VERSION ... "." ... PLUGIN_VERSION_REVISION,
+	url = "https://github.com/Jugheadbomb/engiesVSzombies"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -282,25 +283,22 @@ public Action TF2_OnPlayerTeleport(int iClient, int iTeleporter, bool &bResult)
 public Action TF2_CalcIsAttackCritical(int iClient, int iWeapon, char[] sClassname, bool &bResult)
 {
 	WeaponConfig config;
-	if (!WeaponConfig_GetByEntity(iWeapon, config, Value_Index))
-		return Plugin_Continue;
-
-	// Gunslinger punch combo hacks
-	if (StrEqual(sClassname, "tf_weapon_robot_arm") && config.iKillComboCrit)
+	if (WeaponConfig_GetByEntity(iWeapon, config, Value_Index) && config.iKillComboCrit)
 	{
-		static int iOffsetComboCount = -1;
-		if (iOffsetComboCount == -1)
-			iOffsetComboCount = FindSendPropInfo("CTFRobotArm", "m_hRobotArm") + 4;	// m_iComboCount
+		// Gunslinger punch combo hacks
+		if (StrEqual(sClassname, "tf_weapon_robot_arm"))
+		{
+			static int iOffsetComboCount = -1;
+			if (iOffsetComboCount == -1)
+				iOffsetComboCount = FindSendPropInfo("CTFRobotArm", "m_hRobotArm") + 4;	// m_iComboCount
 
-		if (g_iKillComboCount[iClient] == config.iKillComboCrit)
-			SetEntData(iWeapon, iOffsetComboCount, 2);
-		else
-			SetEntData(iWeapon, iOffsetComboCount, 0);
-	}
+			if (g_iKillComboCount[iClient] == config.iKillComboCrit)
+				SetEntData(iWeapon, iOffsetComboCount, 2);
+			else
+				SetEntData(iWeapon, iOffsetComboCount, 0);
+		}
 
-	// Set crit in OnTakeDamageAlive hook, so disable here
-	if (config.iKillComboCrit)
-	{
+		// Set crit in OnTakeDamageAlive hook, so disable here
 		bResult = false;
 		return Plugin_Changed;
 	}

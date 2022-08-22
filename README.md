@@ -1,4 +1,4 @@
-# Engineers VS Zombies
+# Engineers VS Zombies [![Action Status](https://github.com/Jugheadbomb/engiesVSzombies/workflows/Package/badge.svg)](https://github.com/Jugheadbomb/engiesVSzombies/actions?query=workflow%3APackage+branch%3Amaster)
 
 Simple **Zombie Survival** gamemode	for Team Fortress 2
 
@@ -12,6 +12,10 @@ Simple **Zombie Survival** gamemode	for Team Fortress 2
 
 ## Admin commands
 - `sm_evz_startbonus`: Start random bonus round
+
+## Builds
+All builds can be found [here](https://github.com/Jugheadbomb/engiesVSzombies/actions?query=workflow%3APackage+branch%3Amaster).
+To download latest build version, select latest package then "Artifacts" button at top right.
 
 ## Requirements
 - SourceMod 1.10+

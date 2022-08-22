@@ -7,39 +7,40 @@ static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
 
 void SDK_Init()
 {
-	GameData hGameData = new GameData("sm-tf2.games");
-	if (!hGameData)
+	GameData hTF2 = new GameData("sm-tf2.games");
+	if (!hTF2)
 		SetFailState("Could not find sm-tf2.games.txt gamedata!");
 
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetVirtual(hGameData.GetOffset("RemoveWearable") - 1);
+	PrepSDKCall_SetVirtual(hTF2.GetOffset("RemoveWearable") - 1);
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	if (!(g_hSDKEquipWearable = EndPrepSDKCall()))
 		LogError("Failed to create call: CBasePlayer::EquipWearable!");
 
-	hGameData = new GameData("evz");
-	if (!hGameData)
+	GameData hEVZ = new GameData("evz");
+	if (!hEVZ)
 		SetFailState("Could not find evz.txt gamedata!");
 
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
+	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
 	g_hSDKSetSpeed = EndPrepSDKCall();
 	if (!(g_hSDKSetSpeed = EndPrepSDKCall()))
 		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
 
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::PlayTauntSceneFromItem");
+	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::PlayTauntSceneFromItem");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
 	if (!(g_hSDKPlayTauntScene = EndPrepSDKCall()))
 		LogError("Failed to create call: CTFPlayer::PlayTauntSceneFromItem");
 
-	g_DHookShouldTransmit = DynamicHook.FromConf(hGameData, "CBaseEntity::ShouldTransmit");
-	g_DHookCanBeUpgraded = DynamicHook.FromConf(hGameData, "CBaseObject::CanBeUpgraded");
-	DynamicDetour.FromConf(hGameData, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Pre, DHook_DoSwingTraceInternalPre);
-	DynamicDetour.FromConf(hGameData, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Post, DHook_DoSwingTraceInternalPost);
+	g_DHookShouldTransmit = DynamicHook.FromConf(hEVZ, "CBaseEntity::ShouldTransmit");
+	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
+	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Pre, DHook_DoSwingTraceInternalPre);
+	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Post, DHook_DoSwingTraceInternalPost);
 
-	delete hGameData;
+	delete hTF2;
+	delete hEVZ;
 }
 
 void SDK_OnClientConnect(int iClient)

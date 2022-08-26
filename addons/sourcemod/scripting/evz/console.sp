@@ -25,7 +25,7 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		strcopy(sArg, sizeof(sArg), "autoteam");
 
 	// Waiting for players, all survivors
-	if (g_nRoundState < EVZRoundState_Setup && !StrEqual(sArg, "spectate", false))
+	if (g_nRoundState == EVZRoundState_Waiting && !StrEqual(sArg, "spectate", false))
 	{
 		if (!IsPlayerAlive(iClient))
 		{

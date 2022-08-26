@@ -97,17 +97,14 @@ int TF2_CreateRoundTimer(int iSetupTime, int iRoundTime)
 {
 	int iTimer = CreateEntityByName("team_round_timer");
 
-	char sSetupTime[8], sRoundTime[8];
-	IntToString(iSetupTime, sSetupTime, sizeof(sSetupTime));
-	IntToString(iRoundTime, sRoundTime, sizeof(sRoundTime));
+	DispatchKeyValue(iTimer, "show_in_hud", "1");
+	DispatchKeyValue(iTimer, "start_paused", "0");
+	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", iSetupTime + 1);
+	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", iRoundTime + 1);
+	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", iRoundTime + 1);
 
-	DispatchKeyValue(iTimer, "setup_length", sSetupTime);
-	DispatchKeyValue(iTimer, "timer_length", sRoundTime);
 	DispatchSpawn(iTimer);
-
-	SetVariantString("1");
-	AcceptEntityInput(iTimer, "ShowInHUD");
-	AcceptEntityInput(iTimer, "Resume");
+	AcceptEntityInput(iTimer, "Enable");
 	return iTimer;
 }
 

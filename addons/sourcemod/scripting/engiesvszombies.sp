@@ -670,7 +670,7 @@ public void Frame_CheckLogics()
 
 public void Frame_CreateRoundTimer()
 {
-	int iTimer = TF2_CreateRoundTimer(g_ConvarInfo.LookupInt("evz_setup_time") + 1, g_ConvarInfo.LookupInt("evz_round_time"));
+	int iTimer = TF2_CreateRoundTimer(g_ConvarInfo.LookupInt("evz_setup_time"), g_ConvarInfo.LookupInt("evz_round_time"));
 	HookSingleEntityOutput(iTimer, "OnSetupFinished", RoundTimer_OnSetupFinished);
 	HookSingleEntityOutput(iTimer, "OnFinished", RoundTimer_OnFinished);
 }

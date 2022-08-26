@@ -1,6 +1,6 @@
 void Event_Init()
 {
-	HookEvent("teamplay_round_start", Event_RoundStart);
+	HookEvent("teamplay_round_start", Event_RoundStart, EventHookMode_Pre);
 	HookEvent("teamplay_round_win", Event_RoundEnd);
 
 	HookEvent("player_team", Event_PlayerTeam, EventHookMode_Pre);

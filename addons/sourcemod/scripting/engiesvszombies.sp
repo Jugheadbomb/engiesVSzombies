@@ -136,7 +136,7 @@ public void OnPluginStart()
 	g_ConvarInfo.Create("evz_zombie_doublejump_height_boost", "380.0", "Zombies double jump height when boosted", _, true, 0.0);
 
 	RegConsoleCmd("sm_evz", Command_MainMenu, "Display main menu of gamemode");
-	RegAdminCmd("sm_evz_startbonus", Command_StartBonus, ADMFLAG_CONVARS, "Start random bonus round");
+	RegAdminCmd("sm_evz_startbonus", Command_StartBonus, ADMFLAG_CONVARS, "Start random bonus round, or force by number");
 
 	AutoExecConfig(true, "engiesvszombies");
 	LoadTranslations("engiesvszombies.phrases");
@@ -725,7 +725,23 @@ public Action Command_StartBonus(int iClient, int iArgc)
 		return Plugin_Handled;
 	}
 
-	BonusRound_StartRoll();
+	if (iArgc > 0)
+	{
+		char sRound[8];
+		GetCmdArg(1, sRound, sizeof(sRound));
+		BonusRound nRound = view_as<BonusRound>(StringToInt(sRound));
+		if (BonusRound_None <= nRound < BonusRound_Count)
+		{
+			BonusRound_StartRound(nRound);
+
+			RoundConfig config;
+			if (RoundConfig_GetCurrent(config))
+				BonusRound_DisplayRound(config, true);
+		}
+	}
+	else
+		BonusRound_StartRoll();
+
 	return Plugin_Handled;
 }
 

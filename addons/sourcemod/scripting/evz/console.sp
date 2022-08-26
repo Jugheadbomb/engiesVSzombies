@@ -27,8 +27,12 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 	// Waiting for players, all survivors
 	if (g_nRoundState < EVZRoundState_Setup && !StrEqual(sArg, "spectate", false))
 	{
-		TF2_ChangeClientTeam(iClient, TFTeam_Survivor);
-		TF2_RespawnPlayer2(iClient);
+		if (!IsPlayerAlive(iClient))
+		{
+			TF2_ChangeClientTeam(iClient, TFTeam_Survivor);
+			TF2_RespawnPlayer2(iClient);
+		}
+
 		return Plugin_Handled;
 	}
 
@@ -125,15 +129,11 @@ public Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
 	if (iArgc < 1)
 		return Plugin_Handled;
 
-	char sClass[32];
-	GetCmdArg(1, sClass, sizeof(sClass));
-
-	if (IsZombie(iClient) && TF2_GetClass(sClass) == TFClass_Zombie)
-		return Plugin_Continue;
-
-	if (IsSurvivor(iClient) && TF2_GetClass(sClass) == TFClass_Survivor)
-		return Plugin_Continue;
-
+	if (IsSurvivor(iClient))
+		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Survivor));
+	else if (IsZombie(iClient))
+		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Zombie));
+	
 	return Plugin_Handled;
 }
 

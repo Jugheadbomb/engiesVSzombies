@@ -222,6 +222,9 @@ public void Event_PostInventory(Event event, const char[] sName, bool bDontBroad
 	SetEntityRenderColor(iClient, 255, 255, 255);
 	SetEntityMoveType(iClient, MOVETYPE_WALK);
 
+	SetVariantString("");
+	AcceptEntityInput(iClient, "SetCustomModel");
+
 	TFClassType nClass = TF2_GetPlayerClass(iClient);
 
 	if (IsSurvivor(iClient))

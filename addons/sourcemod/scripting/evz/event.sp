@@ -6,6 +6,8 @@ void Event_Init()
 	HookEvent("player_team", Event_PlayerTeam, EventHookMode_Pre);
 	HookEvent("post_inventory_application", Event_PostInventory);
 	HookEvent("player_death", Event_PlayerDeath);
+
+	HookEvent("object_destroyed", Event_ObjectDestroyed);
 }
 
 public void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
@@ -408,4 +410,11 @@ public void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadca
 	}
 
 	SetGlow();
+}
+
+public void Event_ObjectDestroyed(Event event, const char[] sName, bool bDontBroadcast)
+{
+	int iClient = GetClientOfUserId(event.GetInt("attacker"));
+	if (IsZombie(iClient) && g_nBonusRound == BonusRound_MurderousJoy)
+		PlayTaunt(iClient, 463); // 463 - laugh taunt
 }

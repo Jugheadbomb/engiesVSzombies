@@ -75,7 +75,8 @@
 	// Menu
 	"Menu_MainTitle"
 	{
-		"en"		"Engineers VS Zombies"
+		"#format"	"{1:s},{2:s}"
+		"en"		"Engineers VS Zombies - {1}.{2}"
 	}
 	"Menu_MainOverview"
 	{

@@ -3,7 +3,7 @@ static int g_iMenuSelection[TF_MAXPLAYERS];
 void Menu_DisplayMain(int iClient)
 {
 	Menu hMenu = new Menu(Menu_SelectMain);
-	hMenu.SetTitle("%T", "Menu_MainTitle", iClient);
+	hMenu.SetTitle("%T", "Menu_MainTitle", iClient, PLUGIN_VERSION, PLUGIN_VERSION_REVISION);
 
 	Menu_AddItemTranslation(hMenu, "overview", "Menu_MainOverview", iClient);
 	Menu_AddItemTranslation(hMenu, "team_survivor", "Menu_MainTeamSurvivor", iClient);

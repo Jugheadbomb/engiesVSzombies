@@ -193,6 +193,9 @@ public void OnPluginEnd()
 
 public void OnClientPutInServer(int iClient)
 {
+	g_flTimeStartAsZombie[iClient] = 0.0;
+	g_bWaitingForTeamSwitch[iClient] = false;
+
 	SDKHook(iClient, SDKHook_OnTakeDamageAlive, Client_OnTakeDamageAlive);
 	SDKHook(iClient, SDKHook_WeaponSwitchPost, Client_WeaponSwitchPost);
 	SDK_OnClientConnect(iClient);
@@ -209,8 +212,6 @@ public void OnClientDisconnect(int iClient)
 {
 	CheckLastSurvivor(iClient);
 	RequestFrame(CheckZombieBypass, iClient);
-
-	g_bWaitingForTeamSwitch[iClient] = false;
 }
 
 public void OnEntityCreated(int iEntity, const char[] sClassname)

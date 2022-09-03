@@ -12,6 +12,10 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 	if (iArgc < 1 && StrEqual(sCommand, "jointeam", false))
 		return Plugin_Handled;
 
+	// Waiting for players
+	if (g_nRoundState == EVZRoundState_Waiting)
+		return Plugin_Continue;
+
 	if (!IsClientInGame(iClient))
 		return Plugin_Continue;
 
@@ -23,18 +27,6 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		strcopy(sArg, sizeof(sArg), "spectate");
 	else if (StrEqual(sCommand, "autoteam", false))
 		strcopy(sArg, sizeof(sArg), "autoteam");
-
-	// Waiting for players, all survivors
-	if (g_nRoundState == EVZRoundState_Waiting && !StrEqual(sArg, "spectate", false))
-	{
-		if (!IsPlayerAlive(iClient))
-		{
-			TF2_ChangeClientTeam(iClient, TFTeam_Survivor);
-			TF2_RespawnPlayer2(iClient);
-		}
-
-		return Plugin_Handled;
-	}
 
 	// Check if client is trying to skip playing as zombie by joining spectator
 	if (StrEqual(sArg, "spectate", false))
@@ -129,11 +121,12 @@ public Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
 	if (iArgc < 1)
 		return Plugin_Handled;
 
-	if (IsSurvivor(iClient))
-		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Survivor));
-	else if (IsZombie(iClient))
+	TFClassType nClass = TF2_GetPlayerClass(iClient);
+	if (IsZombie(iClient) && nClass != TFClass_Zombie)
 		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Zombie));
-	
+	else if (IsSurvivor(iClient) && nClass != TFClass_Survivor)
+		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Survivor));
+
 	return Plugin_Handled;
 }
 

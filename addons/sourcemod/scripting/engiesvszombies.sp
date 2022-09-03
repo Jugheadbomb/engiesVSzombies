@@ -114,7 +114,6 @@ public void OnPluginStart()
 
 	HookEntityOutput("func_respawnroom", "OnStartTouch", RespawnRoom_OnStartTouch);
 	HookEntityOutput("func_respawnroom", "OnEndTouch", RespawnRoom_OnEndTouch);
-	HookUserMessage(GetUserMessageId("VGUIMenu"), UserMessage_VGUIMenu, true);
 
 	Config_Init();
 	Console_Init();
@@ -360,17 +359,6 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 			flLastDamageTime[iClient] = GetGameTime() + 0.25;
 		}
 	}
-
-	return Plugin_Continue;
-}
-
-public Action UserMessage_VGUIMenu(UserMsg msg_id, BfRead bf, const int[] iPlayers, int iPlayersnum, bool bReliable, bool bInit)
-{
-	char sType[32];
-	bf.ReadString(sType, sizeof(sType));
-
-	if (g_nRoundState == EVZRoundState_Waiting && (StrEqual(sType, "class_red") || StrEqual(sType, "class_blue")))
-		return Plugin_Handled;
 
 	return Plugin_Continue;
 }

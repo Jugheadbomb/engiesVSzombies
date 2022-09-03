@@ -202,10 +202,6 @@ public void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
 
 public void Event_PlayerTeam(Event event, const char[] sName, bool bDontBroadcast)
 {
-	int iClient = GetClientOfUserId(event.GetInt("userid"));
-	if (event.GetBool("autoteam") && g_nRoundState == EVZRoundState_Waiting)
-		TF2_SetPlayerClass(iClient, TFClass_Survivor);
-
 	event.BroadcastDisabled = true;
 }
 

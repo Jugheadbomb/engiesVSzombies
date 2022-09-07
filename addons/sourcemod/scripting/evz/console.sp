@@ -118,16 +118,28 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 
 public Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
 {
-	if (iArgc < 1)
+	if (iArgc < 1 || IsPlayerAlive(iClient))
 		return Plugin_Handled;
 
-	TFClassType nClass = TF2_GetPlayerClass(iClient);
-	if (IsZombie(iClient) && nClass != TFClass_Zombie)
-		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Zombie));
-	else if (IsSurvivor(iClient) && nClass != TFClass_Survivor)
-		SetEntProp(iClient, Prop_Send, "m_iDesiredPlayerClass", view_as<int>(TFClass_Survivor));
+	char sClass[32];
+	GetCmdArg(1, sClass, sizeof(sClass));
 
-	return Plugin_Handled;
+	TFClassType nClass = TF2_GetClass(sClass);
+
+	if (IsZombie(iClient) && nClass != TFClass_Zombie)
+	{
+		TF2_GetClassName(TFClass_Zombie, sClass, sizeof(sClass));
+		ClientCommand(iClient, "joinclass %s", sClass);
+		return Plugin_Handled;
+	}
+	else if (IsSurvivor(iClient) && nClass != TFClass_Survivor)
+	{
+		TF2_GetClassName(TFClass_Survivor, sClass, sizeof(sClass));
+		ClientCommand(iClient, "joinclass %s", sClass);
+		return Plugin_Handled;
+	}
+
+	return Plugin_Continue;
 }
 
 public Action Console_Build(int iClient, const char[] sCommand, int iArgc)

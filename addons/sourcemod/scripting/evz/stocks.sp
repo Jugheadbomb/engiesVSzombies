@@ -166,6 +166,23 @@ int GetClassVoodooDefIndex(TFClassType nClass)
 	return g_iVoodooIndex[view_as<int>(nClass)];
 }
 
+void TF2_GetClassName(TFClassType nClass, char[] sBuffer, int iLength)
+{
+	switch (nClass)
+	{
+		case TFClass_Unknown: strcopy(sBuffer, iLength, "unknown");
+		case TFClass_Scout: strcopy(sBuffer, iLength, "scout");
+		case TFClass_Sniper: strcopy(sBuffer, iLength, "sniper");
+		case TFClass_Soldier: strcopy(sBuffer, iLength, "soldier");
+		case TFClass_DemoMan: strcopy(sBuffer, iLength, "demoman");
+		case TFClass_Medic: strcopy(sBuffer, iLength, "medic");
+		case TFClass_Heavy: strcopy(sBuffer, iLength, "heavy");
+		case TFClass_Pyro:strcopy(sBuffer, iLength, "pyro");
+		case TFClass_Spy: strcopy(sBuffer, iLength, "spy");
+		case TFClass_Engineer: strcopy(sBuffer, iLength, "engineer");
+	}
+}
+
 bool IsAllowedToBuildSentry(int iClient)
 {
 	for (int iSlot = WeaponSlot_Primary; iSlot <= WeaponSlot_BuilderEngie; iSlot++)

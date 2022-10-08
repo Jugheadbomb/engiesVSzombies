@@ -411,6 +411,7 @@ public void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadca
 public void Event_ObjectDestroyed(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("attacker"));
-	if (IsZombie(iClient) && g_nBonusRound == BonusRound_MurderousJoy)
+	int iBuilder = GetClientOfUserId(event.GetInt("userid"));
+	if (0 < iClient <= MaxClients && IsClientInGame(iClient) && iClient != iBuilder && g_nBonusRound == BonusRound_MurderousJoy)
 		PlayTaunt(iClient, 463); // 463 - laugh taunt
 }

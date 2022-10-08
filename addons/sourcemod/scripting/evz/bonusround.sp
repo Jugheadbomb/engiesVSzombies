@@ -57,9 +57,9 @@ public Action BonusRound_Roll(Handle hTimer, float flEndTime)
 void BonusRound_DisplayRound(RoundConfig config, bool bFull)
 {
 	int iColor[4];
-	iColor[0] = GetURandomInt() % 0xFF;
-	iColor[1] = GetURandomInt() % 0xFF;
-	iColor[2] = GetURandomInt() % 0xFF;
+	iColor[0] = (GetURandomInt() % 206) + 50; // From 50 to 255
+	iColor[1] = (GetURandomInt() % 206) + 50;
+	iColor[2] = (GetURandomInt() % 206) + 50;
 	iColor[3] = bFull ? 255 : 200;
 
 	SetHudTextParams(-1.0, 0.3, bFull ? 6.0 : 0.1, iColor[0], iColor[1], iColor[2], iColor[3], 1, _, 0.0, bFull ? 0.5 : 0.0);

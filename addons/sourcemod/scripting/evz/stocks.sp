@@ -93,21 +93,6 @@ void TF2_EndRound(TFTeam nTeam)
 	AcceptEntityInput(iIndex, "RoundWin");
 }
 
-int TF2_CreateRoundTimer(int iSetupTime, int iRoundTime)
-{
-	int iTimer = CreateEntityByName("team_round_timer");
-
-	DispatchKeyValue(iTimer, "show_in_hud", "1");
-	DispatchKeyValue(iTimer, "start_paused", "0");
-	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", iSetupTime + 1);
-	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", iRoundTime + 1);
-	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", iRoundTime + 1);
-
-	DispatchSpawn(iTimer);
-	AcceptEntityInput(iTimer, "Enable");
-	return iTimer;
-}
-
 void SendEntityInput(const char[] sClassname, const char[] sInput)
 {
 	int iIndex = MaxClients + 1;

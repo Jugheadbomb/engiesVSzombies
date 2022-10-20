@@ -187,7 +187,7 @@ public void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcas
 			BonusRound_StartRoll();
 	}
 
-	RequestFrame(Frame_CreateRoundTimer);
+	CreateTimer(0.5, Timer_CreateRoundTimer);
 	SetGlow();
 }
 

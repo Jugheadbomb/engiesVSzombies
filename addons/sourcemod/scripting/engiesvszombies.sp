@@ -669,11 +669,21 @@ public void Frame_CheckLogics()
 	}
 }
 
-public void Frame_CreateRoundTimer()
+public Action Timer_CreateRoundTimer(Handle hTimer)
 {
-	int iTimer = TF2_CreateRoundTimer(g_ConvarInfo.LookupInt("evz_setup_time"), g_ConvarInfo.LookupInt("evz_round_time"));
+	int iTimer = CreateEntityByName("team_round_timer");
+
+	DispatchKeyValue(iTimer, "show_in_hud", "1");
+	DispatchKeyValue(iTimer, "start_paused", "0");
+	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", g_ConvarInfo.LookupInt("evz_setup_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", g_ConvarInfo.LookupInt("evz_round_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", g_ConvarInfo.LookupInt("evz_round_time"));
+
+	DispatchSpawn(iTimer);
+	AcceptEntityInput(iTimer, "Enable");
 	HookSingleEntityOutput(iTimer, "OnSetupFinished", RoundTimer_OnSetupFinished);
 	HookSingleEntityOutput(iTimer, "OnFinished", RoundTimer_OnFinished);
+	return Plugin_Handled;
 }
 
 public void Frame_CheckZombieBypass(int iClient)

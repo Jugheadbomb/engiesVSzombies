@@ -64,7 +64,7 @@ void ConVar_Init()
 	g_ConvarInfo = new ConvarInfo();
 }
 
-public void ConvarInfo_Changed(ConVar convar, const char[] sOldValue, const char[] sNewValue)
+void ConvarInfo_Changed(ConVar convar, const char[] sOldValue, const char[] sNewValue)
 {
 	g_ConvarInfo.Changed(convar, sNewValue);
 }

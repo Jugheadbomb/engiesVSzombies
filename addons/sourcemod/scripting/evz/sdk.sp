@@ -54,7 +54,7 @@ void SDK_OnEntityCreated(int iEntity, const char[] sClassname)
 		g_DHookCanBeUpgraded.HookEntity(Hook_Post, iEntity, DHook_CanBeUpgradedPost);
 }
 
-public MRESReturn DHook_ShouldTransmitPost(int iClient, DHookReturn ret, DHookParam params)
+MRESReturn DHook_ShouldTransmitPost(int iClient, DHookReturn ret, DHookParam params)
 {
 	if (GetEntProp(iClient, Prop_Send, "m_bGlowEnabled"))
 	{
@@ -65,7 +65,7 @@ public MRESReturn DHook_ShouldTransmitPost(int iClient, DHookReturn ret, DHookPa
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam params)
+MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam params)
 {
 	if (g_nBonusRound == BonusRound_NoUpgrades)
 	{
@@ -76,7 +76,7 @@ public MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookP
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)
+MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)
 {
 	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
 		return MRES_Ignored;
@@ -104,7 +104,7 @@ public MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHo
 	return MRES_Ignored;
 }
 
-public MRESReturn DHook_DoSwingTraceInternalPost(int iMelee, DHookReturn ret, DHookParam params)
+MRESReturn DHook_DoSwingTraceInternalPost(int iMelee, DHookReturn ret, DHookParam params)
 {
 	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
 		return MRES_Ignored;

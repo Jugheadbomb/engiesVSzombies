@@ -10,7 +10,7 @@ void Event_Init()
 	HookEvent("object_destroyed", Event_ObjectDestroyed);
 }
 
-public void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
+void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 {
 	g_bLastSurvivor = false;
 
@@ -191,7 +191,7 @@ public void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcas
 	SetGlow();
 }
 
-public void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
+void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
 {
 	g_nRoundState = EVZRoundState_End;
 	SendEntityInput("func_respawnroom", "DisableAndEndTouch");
@@ -200,12 +200,12 @@ public void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
 	SetGlow();
 }
 
-public void Event_PlayerTeam(Event event, const char[] sName, bool bDontBroadcast)
+void Event_PlayerTeam(Event event, const char[] sName, bool bDontBroadcast)
 {
 	event.BroadcastDisabled = true;
 }
 
-public void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
+void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
 	if (TF2_GetClientTeam(iClient) <= TFTeam_Spectator)
@@ -365,7 +365,7 @@ public void Event_PostInventory(Event event, const char[] sName, bool bDontBroad
 	SetGlow();
 }
 
-public void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
+void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iVictim = GetClientOfUserId(event.GetInt("userid"));
 	if (iVictim <= 0 || iVictim > MaxClients || !IsClientInGame(iVictim))
@@ -408,7 +408,7 @@ public void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadca
 	SetGlow();
 }
 
-public void Event_ObjectDestroyed(Event event, const char[] sName, bool bDontBroadcast)
+void Event_ObjectDestroyed(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("attacker"));
 	int iBuilder = GetClientOfUserId(event.GetInt("userid"));

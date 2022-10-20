@@ -15,7 +15,7 @@ void Menu_DisplayMain(int iClient)
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectMain(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectMain(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{
@@ -58,7 +58,7 @@ void Menu_DisplayInfo(int iClient, const char[] sTitle, const char[] sInfo)
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectInfo(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectInfo(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{
@@ -92,7 +92,7 @@ void Menu_DisplayBalances(int iClient, int iSelection = -1)
 		hMenu.DisplayAt(iClient, iSelection, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{
@@ -140,7 +140,7 @@ void Menu_DisplayWeapon(int iClient, WeaponConfig config)
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectWeapon(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectWeapon(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{
@@ -184,7 +184,7 @@ void Menu_DisplayBonusRounds(int iClient, int iSelection = -1)
 		hMenu.DisplayAt(iClient, iSelection, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{
@@ -227,7 +227,7 @@ void Menu_DisplayRound(int iClient, RoundConfig config)
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
 
-public int Menu_SelectRound(Menu hMenu, MenuAction action, int iClient, int iSlot)
+int Menu_SelectRound(Menu hMenu, MenuAction action, int iClient, int iSlot)
 {
 	switch (action)
 	{

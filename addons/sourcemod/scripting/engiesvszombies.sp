@@ -363,7 +363,7 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 	return Plugin_Continue;
 }
 
-public void RespawnRoom_OnStartTouch(const char[] sOutput, int iCaller, int iActivator, float flDelay)
+void RespawnRoom_OnStartTouch(const char[] sOutput, int iCaller, int iActivator, float flDelay)
 {
 	if (iActivator <= 0 || iActivator > MaxClients || !IsClientInGame(iActivator))
 		return;
@@ -377,7 +377,7 @@ public void RespawnRoom_OnStartTouch(const char[] sOutput, int iCaller, int iAct
 	}
 }
 
-public void RespawnRoom_OnEndTouch(const char[] sOutput, int iCaller, int iActivator, float flDelay)
+void RespawnRoom_OnEndTouch(const char[] sOutput, int iCaller, int iActivator, float flDelay)
 {
 	if (iActivator <= 0 || iActivator > MaxClients || !IsClientInGame(iActivator))
 		return;
@@ -389,7 +389,7 @@ public void RespawnRoom_OnEndTouch(const char[] sOutput, int iCaller, int iActiv
 	}
 }
 
-public void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivator, float flDelay)
+void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivator, float flDelay)
 {
 	if (g_nRoundState != EVZRoundState_Setup)
 		return;
@@ -447,19 +447,19 @@ public void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iA
 	SetGlow();
 }
 
-public void RoundTimer_OnFinished(const char[] sOutput, int iCaller, int iActivator, float flDelay)
+void RoundTimer_OnFinished(const char[] sOutput, int iCaller, int iActivator, float flDelay)
 {
 	RemoveEntity(iCaller);
 	TF2_EndRound(TFTeam_Survivor);
 }
 
-public Action Timer_WelcomeMessage(Handle hTimer)
+Action Timer_WelcomeMessage(Handle hTimer)
 {	
 	CPrintToChatAll("%t", "Chat_WelcomeMessage");
 	return Plugin_Continue;
 }
 
-public Action Timer_Main(Handle hTimer)
+Action Timer_Main(Handle hTimer)
 {
 	if (!IsActiveRound())
 		return Plugin_Continue;
@@ -511,7 +511,7 @@ public Action Timer_Main(Handle hTimer)
 	return Plugin_Continue;
 }
 
-public Action Timer_GiveAttribs(Handle hTimer, DataPack pack)
+Action Timer_GiveAttribs(Handle hTimer, DataPack pack)
 {
 	pack.Reset();
 
@@ -537,7 +537,7 @@ public Action Timer_GiveAttribs(Handle hTimer, DataPack pack)
 	return Plugin_Handled;
 }
 
-public Action Timer_Zombify(Handle hTimer, int iClient)
+Action Timer_Zombify(Handle hTimer, int iClient)
 {
 	if (!IsActiveRound())
 		return Plugin_Handled;
@@ -548,7 +548,7 @@ public Action Timer_Zombify(Handle hTimer, int iClient)
 	return Plugin_Handled;
 }
 
-public Action Timer_RespawnPlayer(Handle hTimer, int iClient)
+Action Timer_RespawnPlayer(Handle hTimer, int iClient)
 {
 	if (IsClientInGame(iClient) && !IsPlayerAlive(iClient))
 		TF2_RespawnPlayer2(iClient);
@@ -556,14 +556,14 @@ public Action Timer_RespawnPlayer(Handle hTimer, int iClient)
 	return Plugin_Handled;
 }
 
-public Action Point_Spawn(int iEntity)
+Action Point_Spawn(int iEntity)
 {
 	// 1 - Hide in HUD, 2 - Hide model
 	SetEntProp(iEntity, Prop_Data, "m_spawnflags", GetEntProp(iEntity, Prop_Data, "m_spawnflags")|1|2);
 	return Plugin_Continue;
 }
 
-public Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, float &flDamage, int &iDamageType, int &iWeapon, float vecForce[3], float vecForcePos[3], int iDamageCustom)
+Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, float &flDamage, int &iDamageType, int &iWeapon, float vecForce[3], float vecForcePos[3], int iDamageCustom)
 {
 	if (IsZombie(iVictim))
 	{
@@ -617,7 +617,7 @@ public Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflic
 	return Plugin_Continue;
 }
 
-public void Client_WeaponSwitchPost(int iClient, int iWeapon)
+void Client_WeaponSwitchPost(int iClient, int iWeapon)
 {
 	static int iPreviousWeapon[TF_MAXPLAYERS];
 
@@ -652,7 +652,7 @@ public void Client_WeaponSwitchPost(int iClient, int iWeapon)
 	iPreviousWeapon[iClient] = iWeapon;
 }
 
-public void Frame_CheckLogics()
+void Frame_CheckLogics()
 {
 	int iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_arena");
 	if (iEntity > MaxClients)
@@ -669,7 +669,7 @@ public void Frame_CheckLogics()
 	}
 }
 
-public Action Timer_CreateRoundTimer(Handle hTimer)
+Action Timer_CreateRoundTimer(Handle hTimer)
 {
 	int iTimer = CreateEntityByName("team_round_timer");
 
@@ -686,20 +686,20 @@ public Action Timer_CreateRoundTimer(Handle hTimer)
 	return Plugin_Handled;
 }
 
-public void Frame_CheckZombieBypass(int iClient)
+void Frame_CheckZombieBypass(int iClient)
 {
 	if (TF2_GetClientTeam(iClient) <= TFTeam_Spectator)
 		CheckZombieBypass(iClient);
 }
 
-public void Frame_PostSetupSpawn(int iClient)
+void Frame_PostSetupSpawn(int iClient)
 {
 	TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
 	TF2_RespawnPlayer2(iClient);
 	g_bWaitingForTeamSwitch[iClient] = false;
 }
 
-public void Frame_SurvivorDeath(int iClient)
+void Frame_SurvivorDeath(int iClient)
 {
 	CheckWinCondition();
 	CheckLastSurvivor(iClient);
@@ -716,7 +716,7 @@ public void Frame_SurvivorDeath(int iClient)
 	}
 }
 
-public Action Command_MainMenu(int iClient, int iArgc)
+Action Command_MainMenu(int iClient, int iArgc)
 {
 	if (iClient == 0)
 		return Plugin_Handled;
@@ -725,7 +725,7 @@ public Action Command_MainMenu(int iClient, int iArgc)
 	return Plugin_Handled;
 }
 
-public Action Command_StartBonus(int iClient, int iArgc)
+Action Command_StartBonus(int iClient, int iArgc)
 {
 	if (iClient == 0)
 		return Plugin_Handled;

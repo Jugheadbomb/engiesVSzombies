@@ -29,7 +29,7 @@ void BonusRound_StartRoll()
 			EmitSoundToClient(iClient, BONUSROUND_ROLLSOUND);
 }
 
-public Action BonusRound_Roll(Handle hTimer, float flEndTime)
+Action BonusRound_Roll(Handle hTimer, float flEndTime)
 {
 	static int index = 0;
 	RoundConfig config;

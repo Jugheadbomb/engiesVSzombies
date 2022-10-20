@@ -7,7 +7,7 @@ void Console_Init()
 	AddCommandListener(Console_Build, "build");
 }
 
-public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
+Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 {
 	if (iArgc < 1 && StrEqual(sCommand, "jointeam", false))
 		return Plugin_Handled;
@@ -116,7 +116,7 @@ public Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 	return Plugin_Continue;
 }
 
-public Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
+Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
 {
 	if (iArgc < 1 || IsPlayerAlive(iClient))
 		return Plugin_Handled;
@@ -142,7 +142,7 @@ public Action Console_JoinClass(int iClient, const char[] sCommand, int iArgc)
 	return Plugin_Continue;
 }
 
-public Action Console_Build(int iClient, const char[] sCommand, int iArgc)
+Action Console_Build(int iClient, const char[] sCommand, int iArgc)
 {
 	if (iArgc < 1)
 		return Plugin_Handled;

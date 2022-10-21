@@ -88,7 +88,7 @@ void BonusRound_StartRound(BonusRound id)
 		case BonusRound_NoDispensers: SendEntityInput("obj_dispenser", "Kill");
 		case BonusRound_EarlyOutbreak:
 		{
-			int iTimer = FindEntityByClassname(MaxClients + 1, "team_round_timer");
+			int iTimer = FindEntityByClassname(-1, "team_round_timer");
 			if (iTimer > MaxClients)
 			{
 				SetVariantInt(1);

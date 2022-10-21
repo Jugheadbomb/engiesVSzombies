@@ -25,7 +25,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	SendEntityInput("func_respawnroomvisualizer", "Disable");
 	SendEntityInput("func_tracktrain", "Kill");
 
-	int iEntity = MaxClients + 1;
+	int iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "func_door")) > MaxClients)
 	{
 		AcceptEntityInput(iEntity, "Unlock");
@@ -33,14 +33,14 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		AcceptEntityInput(iEntity, "Lock");
 	}
 
-	iEntity = MaxClients + 1;
+	iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) > MaxClients)
 	{
 		SetVariantInt(1);
 		AcceptEntityInput(iEntity, "SetLocked");
 	}
 
-	iEntity = MaxClients + 1;
+	iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "func_brush")) > MaxClients)
 	{
 		char sTargetName[128];
@@ -49,14 +49,14 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			AcceptEntityInput(iEntity, "Disable");
 	}
 
-	iEntity = FindEntityByClassname(MaxClients + 1, "team_control_point_master");
+	iEntity = FindEntityByClassname(-1, "team_control_point_master");
 	if (iEntity > MaxClients)
 	{
 		SetEntProp(iEntity, Prop_Data, "m_bScorePerCapture", false);
 		SetEntProp(iEntity, Prop_Data, "m_bSwitchTeamsOnWin", false);
 	}
 
-	iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_holiday");
+	iEntity = FindEntityByClassname(-1, "tf_logic_holiday");
 	if (iEntity > MaxClients)
 	{
 		SetVariantInt(0);
@@ -350,7 +350,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	}
 	else if (IsSurvivor(iClient) && !IsAllowedToBuildSentry(iClient))
 	{
-		int iSentry = MaxClients + 1;
+		int iSentry = -1;
 		while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) > MaxClients)
 		{
 			if (GetEntPropEnt(iSentry, Prop_Send, "m_hBuilder") == iClient)

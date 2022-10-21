@@ -95,7 +95,7 @@ void TF2_EndRound(TFTeam nTeam)
 
 void SendEntityInput(const char[] sClassname, const char[] sInput)
 {
-	int iIndex = MaxClients + 1;
+	int iIndex = -1;
 	while ((iIndex = FindEntityByClassname(iIndex, sClassname)) > MaxClients)
 		AcceptEntityInput(iIndex, sInput);
 }
@@ -135,7 +135,7 @@ void CheckClientWeapons(int iClient)
 	}
 
 	// Cosmetics
-	int iWearable = MaxClients + 1;
+	int iWearable = -1;
 	while ((iWearable = FindEntityByClassname(iWearable, "tf_wearable*")) > MaxClients)
 	{
 		if (GetEntPropEnt(iWearable, Prop_Send, "m_hOwnerEntity") == iClient || GetEntPropEnt(iWearable, Prop_Send, "moveparent") == iClient)
@@ -203,7 +203,7 @@ int GetPlayerCount(TFTeam nTeam = TFTeam_Unassigned, bool bAlive = false)
 
 void SetTeamRespawnTime(TFTeam nTeam, float flTime)
 {
-	int iEntity = FindEntityByClassname(MaxClients + 1, "tf_gamerules");
+	int iEntity = FindEntityByClassname(-1, "tf_gamerules");
 	if (iEntity > MaxClients)
 	{
 		SetVariantFloat(flTime);

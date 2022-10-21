@@ -396,7 +396,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 
 	g_nRoundState = EVZRoundState_Active;
 
-	int iEntity = MaxClients + 1;
+	int iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "func_respawnroom")) > MaxClients)
 	{
 		if (view_as<TFTeam>(GetEntProp(iEntity, Prop_Send, "m_iTeamNum")) == TFTeam_Survivor)
@@ -432,7 +432,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 	}
 
 	// Check for valid sentries
-	int iSentry = MaxClients + 1;
+	int iSentry = -1;
 	while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) > MaxClients)
 	{
 		int iBuilder = GetEntPropEnt(iSentry, Prop_Send, "m_hBuilder");
@@ -464,7 +464,7 @@ Action Timer_Main(Handle hTimer)
 	if (!IsActiveRound())
 		return Plugin_Continue;
 
-	int iTimer = FindEntityByClassname(MaxClients + 1, "team_round_timer");
+	int iTimer = FindEntityByClassname(-1, "team_round_timer");
 	if (iTimer > MaxClients && g_nRoundState == EVZRoundState_Active)
 	{
 		float flTimeRemaining = GetEntPropFloat(iTimer, Prop_Send, "m_flTimerEndTime") - GetGameTime();
@@ -654,14 +654,14 @@ void Client_WeaponSwitchPost(int iClient, int iWeapon)
 
 void Frame_CheckLogics()
 {
-	int iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_arena");
+	int iEntity = FindEntityByClassname(-1, "tf_logic_arena");
 	if (iEntity > MaxClients)
 	{
 		AcceptEntityInput(iEntity, "Kill");
 		GameRules_SetProp("m_nGameType", 0);
 	}
 
-	iEntity = FindEntityByClassname(MaxClients + 1, "tf_logic_koth");
+	iEntity = FindEntityByClassname(-1, "tf_logic_koth");
 	if (iEntity > MaxClients)
 	{
 		AcceptEntityInput(iEntity, "Kill");

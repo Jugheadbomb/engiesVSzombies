@@ -41,7 +41,6 @@ ConVar mp_waitingforplayers_time;
 ConVar tf_boost_drain_time;
 
 Cookie g_cForceZombieStart;
-
 bool g_bLastSurvivor;
 
 enum struct Player

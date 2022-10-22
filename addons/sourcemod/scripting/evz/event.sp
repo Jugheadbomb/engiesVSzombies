@@ -17,7 +17,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	// Control entities
 	SendEntityInput("team_control_point_master", "Disable");
 	SendEntityInput("mapobj_cart_dispenser", "Disable");
-	SendEntityInput("trigger_multiple", "Disable");
 	SendEntityInput("trigger_capture_area", "Disable");
 	SendEntityInput("func_areaportal", "Open");
 	SendEntityInput("func_capturezone", "Disable");

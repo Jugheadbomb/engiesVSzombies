@@ -50,15 +50,15 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 			}
 
 			// ...as a spectator who didn't start as an infected, set them as infected after setup ends, after warning them
-			if (nTeam <= TFTeam_Spectator && !g_bStartedAsZombie[iClient])
+			if (nTeam <= TFTeam_Spectator && !g_Player[iClient].bStartedAsZombie)
 			{
-				if (!g_bWaitingForTeamSwitch[iClient])
+				if (!g_Player[iClient].bWaitingForTeamSwitch)
 				{
 					if (nTeam == TFTeam_Unassigned) // If they're unassigned, let them spectate for now
 						TF2_ChangeClientTeam(iClient, TFTeam_Spectator);
 
 					CPrintToChat(iClient, "%t", "Chat_WillJoinZombieSetup");
-					g_bWaitingForTeamSwitch[iClient] = true;
+					g_Player[iClient].bWaitingForTeamSwitch = true;
 				}
 
 				return Plugin_Handled;
@@ -66,10 +66,10 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		}
 		else if (StrEqual(sArg, "spectate", false))
 		{
-			if (nTeam <= TFTeam_Spectator && g_bWaitingForTeamSwitch[iClient])
+			if (nTeam <= TFTeam_Spectator && g_Player[iClient].bWaitingForTeamSwitch)
 			{
 				CPrintToChat(iClient, "%t", "Chat_CancelSetupEnd");
-				g_bWaitingForTeamSwitch[iClient] = false;
+				g_Player[iClient].bWaitingForTeamSwitch = false;
 			}
 
 			return Plugin_Continue;
@@ -79,9 +79,9 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		// deny and set them as infected instead
 		else if (StrEqual(sArg, sSurTeam, false))
 		{
-			if (nTeam <= TFTeam_Spectator && !g_bWaitingForTeamSwitch[iClient])
+			if (nTeam <= TFTeam_Spectator && !g_Player[iClient].bWaitingForTeamSwitch)
 			{
-				if (g_bStartedAsZombie[iClient])
+				if (g_Player[iClient].bStartedAsZombie)
 				{
 					TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
 					TF2_RespawnPlayer2(iClient);
@@ -92,7 +92,7 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 						TF2_ChangeClientTeam(iClient, TFTeam_Spectator);
 
 					CPrintToChat(iClient, "%t", "Chat_CantJoinDuringSetup");
-					g_bWaitingForTeamSwitch[iClient] = true;
+					g_Player[iClient].bWaitingForTeamSwitch = true;
 				}
 			}
 		}

@@ -41,13 +41,19 @@ ConVar mp_waitingforplayers_time;
 ConVar tf_boost_drain_time;
 
 Cookie g_cForceZombieStart;
-bool g_bForceZombieStart[TF_MAXPLAYERS];
 
 bool g_bLastSurvivor;
-int g_iKillComboCount[TF_MAXPLAYERS];
-float g_flTimeStartAsZombie[TF_MAXPLAYERS];
-bool g_bStartedAsZombie[TF_MAXPLAYERS];
-bool g_bWaitingForTeamSwitch[TF_MAXPLAYERS];
+
+enum struct Player
+{
+	bool bForceZombieStart;
+	int iKillComboCount;
+	float flTimeStartAsZombie;
+	bool bStartedAsZombie;
+	bool bWaitingForTeamSwitch;
+}
+
+Player g_Player[TF_MAXPLAYERS];
 
 enum
 {
@@ -192,8 +198,8 @@ public void OnPluginEnd()
 
 public void OnClientPutInServer(int iClient)
 {
-	g_flTimeStartAsZombie[iClient] = 0.0;
-	g_bWaitingForTeamSwitch[iClient] = false;
+	g_Player[iClient].flTimeStartAsZombie = 0.0;
+	g_Player[iClient].bWaitingForTeamSwitch = false;
 
 	SDKHook(iClient, SDKHook_OnTakeDamageAlive, Client_OnTakeDamageAlive);
 	SDKHook(iClient, SDKHook_WeaponSwitchPost, Client_WeaponSwitchPost);
@@ -204,7 +210,7 @@ public void OnClientCookiesCached(int iClient)
 {
 	char sValue[8];
 	g_cForceZombieStart.Get(iClient, sValue, sizeof(sValue));
-	g_bForceZombieStart[iClient] = !!StringToInt(sValue);
+	g_Player[iClient].bForceZombieStart = !!StringToInt(sValue);
 }
 
 public void OnClientDisconnect(int iClient)
@@ -293,7 +299,7 @@ public Action TF2_CalcIsAttackCritical(int iClient, int iWeapon, char[] sClassna
 			if (iOffsetComboCount == -1)
 				iOffsetComboCount = FindSendPropInfo("CTFRobotArm", "m_hRobotArm") + 4;	// m_iComboCount
 
-			if (g_iKillComboCount[iClient] == config.iKillComboCrit)
+			if (g_Player[iClient].iKillComboCount == config.iKillComboCrit)
 				SetEntData(iWeapon, iOffsetComboCount, 2);
 			else
 				SetEntData(iWeapon, iOffsetComboCount, 0);
@@ -415,7 +421,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 		if (!IsClientInGame(iClient))
 			continue;
 
-		if (g_bWaitingForTeamSwitch[iClient])
+		if (g_Player[iClient].bWaitingForTeamSwitch)
 			RequestFrame(Frame_PostSetupSpawn, iClient);
 
 		if (IsZombie(iClient) && IsPlayerAlive(iClient))
@@ -602,12 +608,12 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 			if (!WeaponConfig_GetByEntity(iWeapon, config, Value_Index) || !config.iKillComboCrit)
 				return Plugin_Continue;
 
-			if (g_iKillComboCount[iAttacker] == config.iKillComboCrit)
+			if (g_Player[iAttacker].iKillComboCount == config.iKillComboCrit)
 			{
 				iDamageType |= DMG_CRIT;
 				flDamage *= 3.0;
 
-				g_iKillComboCount[iAttacker] = 0;
+				g_Player[iAttacker].iKillComboCount = 0;
 				return Plugin_Changed;
 			}
 		}
@@ -696,7 +702,7 @@ void Frame_PostSetupSpawn(int iClient)
 {
 	TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
 	TF2_RespawnPlayer2(iClient);
-	g_bWaitingForTeamSwitch[iClient] = false;
+	g_Player[iClient].bWaitingForTeamSwitch = false;
 }
 
 void Frame_SurvivorDeath(int iClient)
@@ -712,7 +718,7 @@ void Frame_SurvivorDeath(int iClient)
 		TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
 		TF2_SetPlayerClass(iClient, TFClass_Zombie);
 
-		g_flTimeStartAsZombie[iClient] = GetGameTime();
+		g_Player[iClient].flTimeStartAsZombie = GetGameTime();
 	}
 }
 
@@ -827,12 +833,12 @@ void CheckZombieBypass(int iClient)
 	int iSurvivors = GetPlayerCount(TFTeam_Survivor, true);
 	int iZombies = GetPlayerCount(TFTeam_Zombie);
 
-	if ((g_flTimeStartAsZombie[iClient] != 0.0)						// Check if client is currently playing as zombie (if it 0.0, it means he have not played as zombie yet this round)
-		&& (g_flTimeStartAsZombie[iClient] > GetGameTime() - 90.0)	// Check if client have been playing zombie less than 90 seconds
+	if ((g_Player[iClient].flTimeStartAsZombie != 0.0)						// Check if client is currently playing as zombie (if it 0.0, it means he have not played as zombie yet this round)
+		&& (g_Player[iClient].flTimeStartAsZombie > GetGameTime() - 90.0)	// Check if client have been playing zombie less than 90 seconds
 		&& (float(iZombies) / float(iSurvivors + iZombies) <= 0.6)	// Check if less than 60% of players is zombie
 		&& (g_nRoundState != EVZRoundState_End))								// Check if round did not end or map changing
 	{
-		g_bForceZombieStart[iClient] = true;
+		g_Player[iClient].bForceZombieStart = true;
 		g_cForceZombieStart.Set(iClient, "1");
 	}
 }

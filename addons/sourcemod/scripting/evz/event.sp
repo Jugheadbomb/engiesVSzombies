@@ -78,7 +78,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	// Find all active players
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
-		g_flTimeStartAsZombie[iClient] = 0.0;
+		g_Player[iClient].flTimeStartAsZombie = 0.0;
 		g_bUsedVest[iClient] = false;
 
 		if (IsClientInGame(iClient) && TF2_GetClientTeam(iClient) > TFTeam_Spectator)
@@ -101,24 +101,24 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		int iClient = iClients[i];
 		if (IsClientInGame(iClient))
 		{
-			if (g_bForceZombieStart[iClient])
+			if (g_Player[iClient].bForceZombieStart)
 			{
 				// If player attempted to skip playing as zombie last time, force him to be in zombie team
 				CPrintToChat(iClient, "%t", "Chat_ForceZombieStart");
-				g_bForceZombieStart[iClient] = false;
+				g_Player[iClient].bForceZombieStart = false;
 				g_cForceZombieStart.Set(iClient, "0");
 
 				SpawnClient(iClient, TFTeam_Zombie);
 				nClientTeam[iClient] = TFTeam_Zombie;
-				g_bStartedAsZombie[iClient] = true;
-				g_flTimeStartAsZombie[iClient] = GetGameTime();
+				g_Player[iClient].bStartedAsZombie = true;
+				g_Player[iClient].flTimeStartAsZombie = GetGameTime();
 			}
-			else if (g_bStartedAsZombie[iClient])
+			else if (g_Player[iClient].bStartedAsZombie)
 			{
 				// Players who started as zombie last time is forced to be survivors
 				SpawnClient(iClient, TFTeam_Survivor);
 				nClientTeam[iClient] = TFTeam_Survivor;
-				g_bStartedAsZombie[iClient] = false;
+				g_Player[iClient].bStartedAsZombie = false;
 				iSurvivorCount--;
 			}
 		}
@@ -135,15 +135,15 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			{
 				SpawnClient(iClient, TFTeam_Survivor);
 				nClientTeam[iClient] = TFTeam_Survivor;
-				g_bStartedAsZombie[iClient] = false;
+				g_Player[iClient].bStartedAsZombie = false;
 				iSurvivorCount--;
 			}
 			else
 			{
 				SpawnClient(iClient, TFTeam_Zombie);
 				nClientTeam[iClient] = TFTeam_Zombie;
-				g_bStartedAsZombie[iClient] = true;
-				g_flTimeStartAsZombie[iClient] = GetGameTime();
+				g_Player[iClient].bStartedAsZombie = true;
+				g_Player[iClient].flTimeStartAsZombie = GetGameTime();
 			}
 		}
 	}
@@ -211,7 +211,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	if (TF2_GetClientTeam(iClient) <= TFTeam_Spectator)
 		return;
 
-	g_iKillComboCount[iClient] = 0;
+	g_Player[iClient].iKillComboCount = 0;
 
 	ClientCommand(iClient, "r_screenoverlay\"\"");
 	TF2_ResetSpeed(iClient);
@@ -382,8 +382,8 @@ void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 			WeaponConfig config;
 			if (WeaponConfig_GetByItemdef(event.GetInt("weapon_def_index"), config) && config.iKillComboCrit)
 			{
-				g_iKillComboCount[iAttacker]++;
-				if (g_iKillComboCount[iAttacker] == config.iKillComboCrit)
+				g_Player[iAttacker].iKillComboCount++;
+				if (g_Player[iAttacker].iKillComboCount == config.iKillComboCrit)
 					CPrintToChat(iAttacker, "%t", "Chat_KillComboCritCharged");
 			}
 		}

@@ -257,13 +257,6 @@ public void TF2_OnWaitingForPlayersEnd()
 	g_nRoundState = EVZRoundState_Setup;
 }
 
-public void TF2_OnConditionAdded(int iClient, TFCond nCond)
-{
-	// Prevent receiving crit from halloween candy
-	if (TF2_IsHolidayActive(TFHoliday_Halloween) && nCond == TFCond_HalloweenCritCandy)
-		TF2_RemoveCondition(iClient, TFCond_HalloweenCritCandy);
-}
-
 public Action TF2_OnIsHolidayActive(TFHoliday nHoliday, bool &bResult)
 {
 	if (nHoliday == TFHoliday_FullMoon || nHoliday == TFHoliday_HalloweenOrFullMoon || nHoliday == TFHoliday_HalloweenOrFullMoonOrValentines)

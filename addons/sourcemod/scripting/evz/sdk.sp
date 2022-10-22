@@ -38,6 +38,7 @@ void SDK_Init()
 	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
 	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Pre, DHook_DoSwingTraceInternalPre);
 	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Post, DHook_DoSwingTraceInternalPost);
+	DynamicDetour.FromConf(hEVZ, "CTFAmmoPack::MakeHolidayPack").Enable(Hook_Pre, DHook_MakeHolidayPackPre);
 
 	delete hTF2;
 	delete hEVZ;
@@ -74,6 +75,11 @@ MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam pa
 	}
 
 	return MRES_Ignored;
+}
+
+MRESReturn DHook_MakeHolidayPackPre(int iAmmoPack)
+{
+	return MRES_Supercede;
 }
 
 MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)

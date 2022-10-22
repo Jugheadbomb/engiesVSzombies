@@ -23,6 +23,12 @@
 				"linux"			"@_ZN18CTFWeaponBaseMelee20DoSwingTraceInternalER10CGameTracebP10CUtlVectorIS0_10CUtlMemoryIS0_iEE"
 				"windows"		"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x81\xEC\x38\x05\x00\x00\xA1\x2A\x2A\x2A\x2A"
 			}
+			"CTFAmmoPack::MakeHolidayPack"
+			{
+				"library"		"server"
+				"linux"			"@_ZN11CTFAmmoPack15MakeHolidayPackEv"
+				"windows"		"\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A"
+			}
 			"CTFPlayer::TeamFortress_SetSpeed"
 			{
 				"library"	"server"
@@ -87,6 +93,13 @@
 						"type"	"objectptr"
 					}
 				}
+			}
+			"CTFAmmoPack::MakeHolidayPack"
+			{
+				"signature"		"CTFAmmoPack::MakeHolidayPack"
+				"callconv"		"thiscall"
+				"return"		"void"
+				"this"			"entity"
 			}
 		}
 	}

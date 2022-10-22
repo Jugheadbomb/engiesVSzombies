@@ -397,7 +397,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 	g_nRoundState = EVZRoundState_Active;
 
 	int iEntity = -1;
-	while ((iEntity = FindEntityByClassname(iEntity, "func_respawnroom")) > MaxClients)
+	while ((iEntity = FindEntityByClassname(iEntity, "func_respawnroom")) != -1)
 	{
 		if (view_as<TFTeam>(GetEntProp(iEntity, Prop_Send, "m_iTeamNum")) == TFTeam_Survivor)
 			AcceptEntityInput(iEntity, "SetInactive");
@@ -433,7 +433,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 
 	// Check for valid sentries
 	int iSentry = -1;
-	while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) > MaxClients)
+	while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) != -1)
 	{
 		int iBuilder = GetEntPropEnt(iSentry, Prop_Send, "m_hBuilder");
 		if (0 < iBuilder <= MaxClients && IsClientInGame(iBuilder) && IsAllowedToBuildSentry(iBuilder))
@@ -457,6 +457,23 @@ Action Timer_WelcomeMessage(Handle hTimer)
 {	
 	CPrintToChatAll("%t", "Chat_WelcomeMessage");
 	return Plugin_Continue;
+}
+
+Action Timer_CreateRoundTimer(Handle hTimer)
+{
+	int iTimer = CreateEntityByName("team_round_timer");
+
+	DispatchKeyValue(iTimer, "show_in_hud", "1");
+	DispatchKeyValue(iTimer, "start_paused", "0");
+	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", g_ConvarInfo.LookupInt("evz_setup_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", g_ConvarInfo.LookupInt("evz_round_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", g_ConvarInfo.LookupInt("evz_round_time"));
+
+	DispatchSpawn(iTimer);
+	AcceptEntityInput(iTimer, "Enable");
+	HookSingleEntityOutput(iTimer, "OnSetupFinished", RoundTimer_OnSetupFinished);
+	HookSingleEntityOutput(iTimer, "OnFinished", RoundTimer_OnFinished);
+	return Plugin_Handled;
 }
 
 Action Timer_Main(Handle hTimer)
@@ -667,23 +684,6 @@ void Frame_CheckLogics()
 		AcceptEntityInput(iEntity, "Kill");
 		GameRules_SetProp("m_bPlayingKoth", false);
 	}
-}
-
-Action Timer_CreateRoundTimer(Handle hTimer)
-{
-	int iTimer = CreateEntityByName("team_round_timer");
-
-	DispatchKeyValue(iTimer, "show_in_hud", "1");
-	DispatchKeyValue(iTimer, "start_paused", "0");
-	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", g_ConvarInfo.LookupInt("evz_setup_time"));
-	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", g_ConvarInfo.LookupInt("evz_round_time"));
-	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", g_ConvarInfo.LookupInt("evz_round_time"));
-
-	DispatchSpawn(iTimer);
-	AcceptEntityInput(iTimer, "Enable");
-	HookSingleEntityOutput(iTimer, "OnSetupFinished", RoundTimer_OnSetupFinished);
-	HookSingleEntityOutput(iTimer, "OnFinished", RoundTimer_OnFinished);
-	return Plugin_Handled;
 }
 
 void Frame_CheckZombieBypass(int iClient)

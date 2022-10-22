@@ -26,7 +26,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	SendEntityInput("func_tracktrain", "Kill");
 
 	int iEntity = -1;
-	while ((iEntity = FindEntityByClassname(iEntity, "func_door")) > MaxClients)
+	while ((iEntity = FindEntityByClassname(iEntity, "func_door")) != -1)
 	{
 		AcceptEntityInput(iEntity, "Unlock");
 		AcceptEntityInput(iEntity, "Open");
@@ -34,14 +34,14 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	}
 
 	iEntity = -1;
-	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) > MaxClients)
+	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) != -1)
 	{
 		SetVariantInt(1);
 		AcceptEntityInput(iEntity, "SetLocked");
 	}
 
 	iEntity = -1;
-	while ((iEntity = FindEntityByClassname(iEntity, "func_brush")) > MaxClients)
+	while ((iEntity = FindEntityByClassname(iEntity, "func_brush")) != -1)
 	{
 		char sTargetName[128];
 		GetEntPropString(iEntity, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
@@ -351,7 +351,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	else if (IsSurvivor(iClient) && !IsAllowedToBuildSentry(iClient))
 	{
 		int iSentry = -1;
-		while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) > MaxClients)
+		while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) != -1)
 		{
 			if (GetEntPropEnt(iSentry, Prop_Send, "m_hBuilder") == iClient)
 			{

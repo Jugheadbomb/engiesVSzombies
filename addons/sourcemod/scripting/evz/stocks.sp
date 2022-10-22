@@ -96,7 +96,7 @@ void TF2_EndRound(TFTeam nTeam)
 void SendEntityInput(const char[] sClassname, const char[] sInput)
 {
 	int iIndex = -1;
-	while ((iIndex = FindEntityByClassname(iIndex, sClassname)) > MaxClients)
+	while ((iIndex = FindEntityByClassname(iIndex, sClassname)) != -1)
 		AcceptEntityInput(iIndex, sInput);
 }
 
@@ -136,7 +136,7 @@ void CheckClientWeapons(int iClient)
 
 	// Cosmetics
 	int iWearable = -1;
-	while ((iWearable = FindEntityByClassname(iWearable, "tf_wearable*")) > MaxClients)
+	while ((iWearable = FindEntityByClassname(iWearable, "tf_wearable*")) != -1)
 	{
 		if (GetEntPropEnt(iWearable, Prop_Send, "m_hOwnerEntity") == iClient || GetEntPropEnt(iWearable, Prop_Send, "moveparent") == iClient)
 		{

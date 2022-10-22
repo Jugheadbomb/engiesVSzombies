@@ -119,6 +119,7 @@ public void OnPluginStart()
 
 	HookEntityOutput("func_respawnroom", "OnStartTouch", RespawnRoom_OnStartTouch);
 	HookEntityOutput("func_respawnroom", "OnEndTouch", RespawnRoom_OnEndTouch);
+	HookEntityOutput("func_door", "OnFullyOpen", Door_OnFullyOpen);
 
 	Config_Init();
 	Console_Init();
@@ -385,6 +386,11 @@ void RespawnRoom_OnEndTouch(const char[] sOutput, int iCaller, int iActivator, f
 		if (IsZombie(iActivator))
 			TF2_RemoveCondition(iActivator, TFCond_UberchargedHidden);
 	}
+}
+
+void Door_OnFullyOpen(const char[] sOutput, int iCaller, int iActivator, float flDelay)
+{
+	RemoveEntity(iCaller);
 }
 
 void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivator, float flDelay)

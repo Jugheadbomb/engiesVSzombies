@@ -29,7 +29,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	{
 		AcceptEntityInput(iEntity, "Unlock");
 		AcceptEntityInput(iEntity, "Open");
-		AcceptEntityInput(iEntity, "Lock");
 	}
 
 	iEntity = -1;

@@ -24,6 +24,8 @@
 #define CHANNEL_INFO 1
 #define CHANNEL_BONUSROUND 2
 
+#define SANTA_HAT 666
+
 TFTeam TFTeam_Zombie = TFTeam_Blue;
 TFTeam TFTeam_Survivor = TFTeam_Red;
 
@@ -789,6 +791,15 @@ Action OnGiveNamedItem(int iClient, int iIndex)
 				// Cosmetic is conflicting with soul
 				action = Plugin_Handled;
 			}
+		}
+	}
+
+	if (iSlot > WeaponSlot_BuilderEngie && TF2_IsHolidayActive(TFHoliday_Christmas))
+	{
+		if (TF2Econ_GetItemEquipRegionMask(SANTA_HAT) & TF2Econ_GetItemEquipRegionMask(iIndex))
+		{
+			// Cosmetic is conflicting with santa hat
+			action = Plugin_Handled;
 		}
 	}
 

@@ -509,6 +509,13 @@ Action Timer_Main(Handle hTimer)
 					{
 						SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
 						SetEntityRenderColor(iClient, iColor[0], iColor[1], iColor[2], iColor[3]);
+
+						int iSoul = GetVoodooSoul(iClient);
+						if (iSoul > MaxClients)
+						{
+							SetEntityRenderMode(iSoul, RENDER_TRANSCOLOR);
+							SetEntityRenderColor(iSoul, iColor[0], iColor[1], iColor[2], iColor[3]);
+						}
 					}
 				}
 			}

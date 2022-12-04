@@ -79,7 +79,7 @@ MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam pa
 
 MRESReturn DHook_MakeHolidayPackPre(int iAmmoPack)
 {
-	return MRES_Supercede;
+	return (TF2_IsHolidayActive(TFHoliday_Christmas)) ? MRES_Ignored : MRES_Supercede;
 }
 
 MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)

@@ -237,25 +237,3 @@ void PrepareSound(const char[] sSound)
 	Format(sBuffer, sizeof(sBuffer), "sound/%s", sSound);
 	AddFileToDownloadsTable(sBuffer);
 }
-
-void PlayTaunt(int iClient, int iTauntID)
-{
-	static Handle hItem;
-	if (!hItem)
-	{
-		hItem = TF2Items_CreateItem(OVERRIDE_ALL|PRESERVE_ATTRIBUTES|FORCE_GENERATION);
-		TF2Items_SetClassname(hItem, "tf_wearable_vm");
-		TF2Items_SetQuality(hItem, 6);
-		TF2Items_SetLevel(hItem, 1);
-		TF2Items_SetNumAttributes(hItem, 0);
-	}
-
-	TF2Items_SetItemIndex(hItem, iTauntID);
-
-	int iEnt = TF2Items_GiveNamedItem(iClient, hItem);
-	Address pEconItemView = GetEntityAddress(iEnt) + view_as<Address>(FindSendPropInfo("CTFWearable", "m_Item"));
-	if (pEconItemView != Address_Null)
-		SDK_PlayTauntSceneFromItem(iClient, pEconItemView);
-
-	AcceptEntityInput(iEnt, "Kill");
-}

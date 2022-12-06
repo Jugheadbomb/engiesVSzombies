@@ -161,6 +161,7 @@ void BonusRound_PlayerSpawn(int iClient)
 	TF2Attrib_RemoveByName(iClient, "health regen");
 	TF2Attrib_RemoveByName(iClient, "voice pitch scale");
 	TF2Attrib_RemoveByName(iClient, "head scale");
+	TF2Attrib_RemoveByName(iClient, "kill forces attacker to laugh");
 
 	switch (g_nBonusRound)
 	{
@@ -190,6 +191,10 @@ void BonusRound_PlayerSpawn(int iClient)
 				TF2_RemoveWeaponSlot(iClient, WeaponSlot_Secondary);
 			}
 		}
+		case BonusRound_MurderousJoy:
+		{
+			TF2Attrib_SetByName(iClient, "kill forces attacker to laugh", 1.0);
+		}
 	}
 }
 
@@ -212,6 +217,10 @@ void BonusRound_ResetClient(int iClient)
 
 			TF2Attrib_RemoveByName(iClient, "voice pitch scale");
 			TF2Attrib_RemoveByName(iClient, "head scale");
+		}
+		case BonusRound_MurderousJoy:
+		{
+			TF2Attrib_RemoveByName(iClient, "kill forces attacker to laugh");
 		}
 	}
 }

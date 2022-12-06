@@ -1,6 +1,5 @@
 static Handle g_hSDKEquipWearable;
 static Handle g_hSDKSetSpeed;
-static Handle g_hSDKPlayTauntScene;
 static DynamicHook g_DHookShouldTransmit;
 static DynamicHook g_DHookCanBeUpgraded;
 static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
@@ -26,13 +25,6 @@ void SDK_Init()
 	g_hSDKSetSpeed = EndPrepSDKCall();
 	if (!(g_hSDKSetSpeed = EndPrepSDKCall()))
 		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
-
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::PlayTauntSceneFromItem");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
-	if (!(g_hSDKPlayTauntScene = EndPrepSDKCall()))
-		LogError("Failed to create call: CTFPlayer::PlayTauntSceneFromItem");
 
 	g_DHookShouldTransmit = DynamicHook.FromConf(hEVZ, "CBaseEntity::ShouldTransmit");
 	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
@@ -138,9 +130,4 @@ void SDK_EquipWearable(int iClient, int iWearable)
 void SDK_SetSpeed(int iClient)
 {
 	SDKCall(g_hSDKSetSpeed, iClient);
-}
-
-void SDK_PlayTauntSceneFromItem(int iClient, Address pEconItemView)
-{
-	SDKCall(g_hSDKPlayTauntScene, iClient, pEconItemView);
 }

@@ -32,29 +32,29 @@ void BonusRound_StartRoll()
 Action BonusRound_Roll(Handle hTimer, float flEndTime)
 {
 	static int index = 0;
-	RoundConfig config;
+	RoundConfig round;
 
 	if (GetGameTime() >= flEndTime)
 	{
-		if (RoundConfig_GetRandom(config))
+		if (g_RoundList.GetRandom(round))
 		{
-			BonusRound_DisplayRound(config, true);
-			BonusRound_StartRound(config.id);
+			BonusRound_DisplayRound(round, true);
+			BonusRound_StartRound(round.id);
 		}
 
 		return Plugin_Stop;
 	}
 
-	if (g_aRounds.GetArray(index, config, sizeof(config)))
-		BonusRound_DisplayRound(config, false);
+	if (g_RoundList.GetArray(index, round, sizeof(round)))
+		BonusRound_DisplayRound(round, false);
 
-	if (++index >= g_aRounds.Length)
+	if (++index >= g_RoundList.Length)
 		index = 0;
 
 	return Plugin_Continue;
 }
 
-void BonusRound_DisplayRound(RoundConfig config, bool bFull)
+void BonusRound_DisplayRound(RoundConfig round, bool bFull)
 {
 	int iColor[4];
 	iColor[0] = (GetURandomInt() % 206) + 50; // From 50 to 255
@@ -70,11 +70,11 @@ void BonusRound_DisplayRound(RoundConfig config, bool bFull)
 
 		if (bFull)
 		{
-			ShowHudText(iClient, CHANNEL_BONUSROUND, "★ %t ★\n%t\n%t", "Hud_BonusRound", config.sName, config.sDesc);
-			CPrintToChat(iClient, "{immortal}%t: {darkorange}%t\n{darkviolet}%t", "Hud_BonusRound", config.sName, config.sDesc);
+			ShowHudText(iClient, CHANNEL_BONUSROUND, "★ %t ★\n%t\n%t", "Hud_BonusRound", round.sName, round.sDesc);
+			CPrintToChat(iClient, "{immortal}%t: {darkorange}%t\n{darkviolet}%t", "Hud_BonusRound", round.sName, round.sDesc);
 		}
 		else
-			ShowHudText(iClient, CHANNEL_BONUSROUND, "%t", config.sName);
+			ShowHudText(iClient, CHANNEL_BONUSROUND, "%t", round.sName);
 	}
 }
 

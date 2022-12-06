@@ -75,13 +75,13 @@ void Menu_DisplayBalances(int iClient, int iSelection = -1)
 	hMenu.SetTitle("%T", "Menu_MainBalances", iClient);
 
 	char sBuffer[16];
-	for (int i = 0; i < g_aWeapons.Length; i++)
+	for (int i = 0; i < g_WeaponList.Length; i++)
 	{
-		WeaponConfig config;
-		g_aWeapons.GetArray(i, config, sizeof(config));
+		WeaponConfig weapon;
+		g_WeaponList.GetArray(i, weapon, sizeof(weapon));
 
 		Format(sBuffer, sizeof(sBuffer), "%i", i);
-		Menu_AddItemTranslation(hMenu, sBuffer, config.sName, iClient);
+		Menu_AddItemTranslation(hMenu, sBuffer, weapon.sName, iClient);
 	}
 
 	hMenu.ExitBackButton = true;
@@ -101,9 +101,9 @@ int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
 			char sInfo[16];
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
-			WeaponConfig config;
-			g_aWeapons.GetArray(StringToInt(sInfo), config, sizeof(config));
-			Menu_DisplayWeapon(iClient, config);
+			WeaponConfig weapon;
+			g_WeaponList.GetArray(StringToInt(sInfo), weapon, sizeof(weapon));
+			Menu_DisplayWeapon(iClient, weapon);
 
 			g_iMenuSelection[iClient] = GetMenuSelectionPosition();
 		}
@@ -118,15 +118,15 @@ int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
 	return 0;
 }
 
-void Menu_DisplayWeapon(int iClient, WeaponConfig config)
+void Menu_DisplayWeapon(int iClient, WeaponConfig weapon)
 {
 	char sBuffer[512];
 	Menu hMenu = new Menu(Menu_SelectWeapon);
 
-	Format(sBuffer, sizeof(sBuffer), "%T", config.sName, iClient);
+	Format(sBuffer, sizeof(sBuffer), "%T", weapon.sName, iClient);
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
-	Format(sBuffer, sizeof(sBuffer), "%s\n%T", sBuffer, config.sDesc, iClient);
+	Format(sBuffer, sizeof(sBuffer), "%s\n%T", sBuffer, weapon.sDesc, iClient);
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
 	ReplaceString(sBuffer, sizeof(sBuffer), "{red}", "");
@@ -159,21 +159,21 @@ void Menu_DisplayBonusRounds(int iClient, int iSelection = -1)
 	char sCurrent[128];
 	Format(sCurrent, sizeof(sCurrent), "%T", "Menu_CurrentRound", iClient);
 
-	RoundConfig config;
-	if (RoundConfig_GetCurrent(config))
-		Format(sCurrent, sizeof(sCurrent), "%s: %T", sCurrent, config.sName, iClient);
+	RoundConfig round;
+	if (g_RoundList.GetCurrent(round))
+		Format(sCurrent, sizeof(sCurrent), "%s: %T", sCurrent, round.sName, iClient);
 	else
 		Format(sCurrent, sizeof(sCurrent), "%s: %T", sCurrent, "Menu_None", iClient);
 
 	hMenu.AddItem("current", sCurrent, ITEMDRAW_DISABLED);
 
 	char sBuffer[16];
-	for (int i = 0; i < g_aRounds.Length; i++)
+	for (int i = 0; i < g_RoundList.Length; i++)
 	{
-		g_aRounds.GetArray(i, config, sizeof(config));
+		g_RoundList.GetArray(i, round, sizeof(round));
 
 		Format(sBuffer, sizeof(sBuffer), "%i", i);
-		Menu_AddItemTranslation(hMenu, sBuffer, config.sName, iClient);
+		Menu_AddItemTranslation(hMenu, sBuffer, round.sName, iClient);
 	}
 
 	hMenu.ExitBackButton = true;
@@ -193,9 +193,9 @@ int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot
 			char sInfo[16];
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
-			RoundConfig config;
-			g_aRounds.GetArray(StringToInt(sInfo), config, sizeof(config));
-			Menu_DisplayRound(iClient, config);
+			RoundConfig round;
+			g_RoundList.GetArray(StringToInt(sInfo), round, sizeof(round));
+			Menu_DisplayRound(iClient, round);
 
 			g_iMenuSelection[iClient] = GetMenuSelectionPosition();
 		}
@@ -210,15 +210,15 @@ int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot
 	return 0;
 }
 
-void Menu_DisplayRound(int iClient, RoundConfig config)
+void Menu_DisplayRound(int iClient, RoundConfig round)
 {
 	char sBuffer[512];
 	Menu hMenu = new Menu(Menu_SelectRound);
 
-	Format(sBuffer, sizeof(sBuffer), "%T", config.sName, iClient);
+	Format(sBuffer, sizeof(sBuffer), "%T", round.sName, iClient);
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
-	Format(sBuffer, sizeof(sBuffer), "%s\n%T", sBuffer, config.sDesc, iClient);
+	Format(sBuffer, sizeof(sBuffer), "%s\n%T", sBuffer, round.sDesc, iClient);
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
 	hMenu.SetTitle(sBuffer);

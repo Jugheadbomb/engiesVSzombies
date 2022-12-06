@@ -45,6 +45,9 @@ ConVar tf_boost_drain_time;
 Cookie g_cForceZombieStart;
 bool g_bLastSurvivor;
 
+EVZRoundState g_nRoundState;
+BonusRound g_nBonusRound;
+
 enum struct Player
 {
 	bool bForceZombieStart;
@@ -75,8 +78,135 @@ enum EVZRoundState
 	EVZRoundState_End
 };
 
-EVZRoundState g_nRoundState;
-BonusRound g_nBonusRound;
+enum FindValue
+{
+	Value_Index = 0,
+	Value_Classname
+};
+
+methodmap WeaponList < ArrayList
+{
+	public WeaponList()
+	{
+		return view_as<WeaponList>(new ArrayList(sizeof(WeaponConfig)));
+	}
+
+	public void LoadSection(KeyValues kv)
+	{
+		this.Clear();
+
+		if (kv.JumpToKey("weapons", false))
+		{
+			if (kv.GotoFirstSubKey())
+			{
+				do
+				{
+					WeaponConfig weapon;
+					if (weapon.ReadFromKv(kv))
+						this.PushArray(weapon, sizeof(weapon));
+				}
+				while (kv.GotoNextKey());
+				kv.GoBack();
+			}
+			kv.GoBack();
+		}
+	}
+
+	public bool GetByEntity(int iWeapon, WeaponConfig weapon, FindValue findval)
+	{
+		switch (findval)
+		{
+			case Value_Index:
+			{
+				int index = GetEntProp(iWeapon, Prop_Send, "m_iItemDefinitionIndex");
+				return this.GetByDefIndex(index, weapon);
+			}
+			case Value_Classname:
+			{
+				char sClassname[64];
+				GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
+				return this.GetByClassname(sClassname, weapon);
+			}
+		}
+
+		return false;
+	}
+
+	public bool GetByDefIndex(int index, WeaponConfig weapon)
+	{
+		int i = this.FindValue(index, WeaponConfig::iIndex);
+		if (i != -1)
+			return !!this.GetArray(i, weapon);
+
+		return false;
+	}
+
+	public bool GetByClassname(const char[] sClassname, WeaponConfig weapon)
+	{
+		for (int i = 0; i < this.Length; i++)
+		{
+			if (!this.GetArray(i, weapon, sizeof(weapon)))
+				continue;
+
+			if (StrEqual(weapon.sClassname, sClassname, false))
+				return true;
+		}
+
+		return false;
+	}
+}
+
+methodmap RoundList < ArrayList
+{
+	public RoundList()
+	{
+		return view_as<RoundList>(new ArrayList(sizeof(RoundConfig)));
+	}
+
+	public void LoadSection(KeyValues kv)
+	{
+		this.Clear();
+
+		if (kv.JumpToKey("bonusrounds", false))
+		{
+			if (kv.GotoFirstSubKey())
+			{
+				do
+				{
+					RoundConfig round;
+					if (round.ReadFromKv(kv))
+						this.PushArray(round, sizeof(round));
+				}
+				while (kv.GotoNextKey());
+				kv.GoBack();
+			}
+			kv.GoBack();
+		}
+	}
+
+	public bool GetRandom(RoundConfig round)
+	{
+		if (this.Length > 0)
+			return !!this.GetArray(GetURandomInt() % this.Length, round, sizeof(round));
+
+		return false;
+	}
+
+	public bool GetCurrent(RoundConfig round)
+	{
+		if (g_nBonusRound == BonusRound_None)
+			return false;
+
+		int index = this.FindValue(g_nBonusRound, RoundConfig::id);
+		if (index != -1)
+			return !!this.GetArray(index, round, sizeof(round));
+
+		return false;
+	}
+}
+
+WeaponList g_WeaponList;
+RoundList g_RoundList;
 
 #include "evz/config.sp"
 #include "evz/bonusround.sp"
@@ -284,8 +414,8 @@ public Action TF2_OnPlayerTeleport(int iClient, int iTeleporter, bool &bResult)
 
 public Action TF2_CalcIsAttackCritical(int iClient, int iWeapon, char[] sClassname, bool &bResult)
 {
-	WeaponConfig config;
-	if (WeaponConfig_GetByEntity(iWeapon, config, Value_Index) && config.iKillComboCrit)
+	WeaponConfig weapon;
+	if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
 	{
 		// Gunslinger punch combo hacks
 		if (StrEqual(sClassname, "tf_weapon_robot_arm"))
@@ -294,7 +424,7 @@ public Action TF2_CalcIsAttackCritical(int iClient, int iWeapon, char[] sClassna
 			if (iOffsetComboCount == -1)
 				iOffsetComboCount = FindSendPropInfo("CTFRobotArm", "m_hRobotArm") + 4;	// m_iComboCount
 
-			if (g_Player[iClient].iKillComboCount == config.iKillComboCrit)
+			if (g_Player[iClient].iKillComboCount == weapon.iKillComboCrit)
 				SetEntData(iWeapon, iOffsetComboCount, 2);
 			else
 				SetEntData(iWeapon, iOffsetComboCount, 0);
@@ -345,8 +475,8 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 	int iActivewep = GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon");
 	if (iActivewep > MaxClients)
 	{
-		WeaponConfig config;
-		if (WeaponConfig_GetByEntity(iActivewep, config, Value_Index) && config.bBlockSecondary)
+		WeaponConfig weapon;
+		if (g_WeaponList.GetByEntity(iActivewep, weapon, Value_Index) && weapon.bBlockSecondary)
 			SetEntPropFloat(iActivewep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 1.0);
 	}
 
@@ -611,11 +741,11 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 
 		if (iWeapon > MaxClients && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker) && IsSurvivor(iAttacker))
 		{
-			WeaponConfig config;
-			if (!WeaponConfig_GetByEntity(iWeapon, config, Value_Index) || !config.iKillComboCrit)
+			WeaponConfig weapon;
+			if (!g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) || !weapon.iKillComboCrit)
 				return Plugin_Continue;
 
-			if (g_Player[iAttacker].iKillComboCount == config.iKillComboCrit)
+			if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
 			{
 				iDamageType |= DMG_CRIT;
 				flDamage *= 3.0;
@@ -651,24 +781,24 @@ void Client_WeaponSwitchPost(int iClient, int iWeapon)
 {
 	static int iPreviousWeapon[TF_MAXPLAYERS];
 
-	WeaponConfig config;
-	if (WeaponConfig_GetByEntity(iWeapon, config, Value_Index) && config.sAttribSwitch[0])
+	WeaponConfig weapon;
+	if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
 	{
 		DataPack pack;
 		CreateDataTimer(GetEntPropFloat(iWeapon, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime(), Timer_GiveAttribs, pack);
 		pack.WriteCell(iClient);
 		pack.WriteCell(iWeapon);
-		pack.WriteString(config.sAttribSwitch);
+		pack.WriteString(weapon.sAttribSwitch);
 	}
 
 	if (iPreviousWeapon[iClient] > MaxClients && IsValidEntity(iPreviousWeapon[iClient]))
 	{
 		if (HasEntProp(iPreviousWeapon[iClient], Prop_Send, "m_iItemDefinitionIndex"))
 		{
-			if (WeaponConfig_GetByEntity(iPreviousWeapon[iClient], config, Value_Index) && config.sAttribSwitch[0])
+			if (g_WeaponList.GetByEntity(iPreviousWeapon[iClient], weapon, Value_Index) && weapon.sAttribSwitch[0])
 			{
 				char sAttribs[32][32];
-				int iCount = ExplodeString(config.sAttribSwitch, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
+				int iCount = ExplodeString(weapon.sAttribSwitch, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
 				if (iCount > 1)
 					for (int j = 0; j < iCount; j += 2)
 						TF2Attrib_RemoveByDefIndex(iPreviousWeapon[iClient], StringToInt(sAttribs[j]));
@@ -758,9 +888,9 @@ Action Command_StartBonus(int iClient, int iArgc)
 		{
 			BonusRound_StartRound(nRound);
 
-			RoundConfig config;
-			if (RoundConfig_GetCurrent(config))
-				BonusRound_DisplayRound(config, true);
+			RoundConfig round;
+			if (g_RoundList.GetCurrent(round))
+				BonusRound_DisplayRound(round, true);
 		}
 	}
 	else

@@ -1,26 +1,20 @@
-#define CONFIG_WEAPONS "configs/evz/weapons.cfg"
-#define CONFIG_ROUNDS "configs/evz/bonusrounds.cfg"
-
-enum
-{
-	Value_Index = 0,
-	Value_Classname
-};
+#define CONFIG_PATH "configs/evz.cfg"
 
 enum struct WeaponConfig
 {
 	int iIndex;
+	char sClassname[64];
+
+	char sName[64];
+	char sDesc[64];
+	char sAttrib[256];
+	char sAttribSwitch[256];
+
 	int iIndexPrefab;
 	int iIndexReplace;
 	int iKillComboCrit;
 	bool bBlockSecondary;
 	bool bSentry;
-
-	char sClassname[64];
-	char sName[64];
-	char sDesc[64];
-	char sAttrib[256];
-	char sAttribSwitch[256];
 
 	bool ReadFromKv(KeyValues kv)
 	{
@@ -79,116 +73,43 @@ enum struct RoundConfig
 	}
 }
 
-ArrayList g_aWeapons;
-ArrayList g_aRounds;
-
 void Config_Init()
 {
-	g_aWeapons = new ArrayList(sizeof(WeaponConfig));
-	g_aRounds = new ArrayList(sizeof(RoundConfig));
+	g_WeaponList = new WeaponList();
+	g_RoundList = new RoundList();
 }
 
 void Config_Refresh()
 {
-	Config_LoadWeapons();
-	Config_LoadRounds();
-}
+	KeyValues kv = Config_LoadFile(CONFIG_PATH);
+	if (!kv)
+		return;
 
-void Config_LoadWeapons()
-{
-	g_aWeapons.Clear();
-
-	char sPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sPath, sizeof(sPath), CONFIG_WEAPONS);
-
-	KeyValues kv = new KeyValues("Weapons");
-	if (kv.ImportFromFile(sPath) && kv.GotoFirstSubKey())
-	{
-		do
-		{
-			WeaponConfig config;
-			if (config.ReadFromKv(kv))
-				g_aWeapons.PushArray(config);
-		}
-		while (kv.GotoNextKey());
-	}
-
+	g_WeaponList.LoadSection(kv);
+	g_RoundList.LoadSection(kv);
 	delete kv;
 }
 
-void Config_LoadRounds()
+KeyValues Config_LoadFile(const char[] configFile)
 {
-	g_aRounds.Clear();
+	char configPath[PLATFORM_MAX_PATH];
 
-	char sPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sPath, sizeof(sPath), CONFIG_ROUNDS);
-
-	KeyValues kv = new KeyValues("BonusRounds");
-	if (kv.ImportFromFile(sPath) && kv.GotoFirstSubKey())
+	BuildPath(Path_SM, configPath, sizeof(configPath), configFile);
+	if (!FileExists(configPath))
 	{
-		do
-		{
-			RoundConfig config;
-			if (config.ReadFromKv(kv))
-				g_aRounds.PushArray(config);
-		}
-		while (kv.GotoNextKey());
+		LogMessage("Failed to load config file (file missing): %s!", configPath);
+		return null;
 	}
 
-	delete kv;
-}
+	KeyValues kv = new KeyValues("Config");
+	kv.SetEscapeSequences(true);
 
-bool WeaponConfig_GetByItemdef(int itemdef, WeaponConfig config)
-{
-	int index = g_aWeapons.FindValue(itemdef, WeaponConfig::iIndex);
-	if (index != -1)
-		return !!g_aWeapons.GetArray(index, config, sizeof(config));
-
-	return false;
-}
-
-bool WeaponConfig_GetByEntity(int iWeapon, WeaponConfig config, int iFindVal)
-{
-	if (iFindVal == Value_Index)
+	if (!kv.ImportFromFile(configPath))
 	{
-		int index = g_aWeapons.FindValue(GetEntProp(iWeapon, Prop_Send, "m_iItemDefinitionIndex"), WeaponConfig::iIndex);
-		if (index != -1)
-			return !!g_aWeapons.GetArray(index, config, sizeof(config));
-
-		return false;
+		LogMessage("Failed to parse config file: %s!", configPath);
+		delete kv;
+		return null;
 	}
 
-	char sClassname[64];
-	GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
-
-	for (int i = 0; i < g_aWeapons.Length; i++)
-	{
-		if (!g_aWeapons.GetArray(i, config, sizeof(config)))
-			continue;
-
-		if (StrEqual(config.sClassname, sClassname, false))
-			return true;
-	}
-
-	return false;
-}
-
-bool RoundConfig_GetRandom(RoundConfig config)
-{
-	if (g_aRounds.Length > 0)
-		return !!g_aRounds.GetArray(GetURandomInt() % g_aRounds.Length, config, sizeof(config));
-
-	return false;
-}
-
-bool RoundConfig_GetCurrent(RoundConfig config)
-{
-	if (g_nBonusRound == BonusRound_None)
-		return false;
-
-	int index = g_aRounds.FindValue(g_nBonusRound, RoundConfig::id);
-	if (index != -1)
-		return !!g_aRounds.GetArray(index, config, sizeof(config));
-
-	return false;
+	return kv;
 }

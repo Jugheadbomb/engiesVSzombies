@@ -160,20 +160,20 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			if (iWeapon == -1)
 				continue;
 
-			WeaponConfig config;
-			if (WeaponConfig_GetByEntity(iWeapon, config, Value_Index))
+			WeaponConfig weapon;
+			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index))
 			{
-				if (config.iIndexPrefab >= 0)
-					WeaponConfig_GetByItemdef(config.iIndexPrefab, config);
+				if (weapon.iIndexPrefab >= 0)
+					g_WeaponList.GetByDefIndex(weapon.iIndexPrefab, weapon);
 
-				if (config.sName[0] && config.sDesc[0])
-					CPrintToChat(iClient, "{immortal}%t: %t", config.sName, config.sDesc);
+				if (weapon.sName[0] && weapon.sDesc[0])
+					CPrintToChat(iClient, "{immortal}%t: %t", weapon.sName, weapon.sDesc);
 			}
 
-			if (WeaponConfig_GetByEntity(iWeapon, config, Value_Classname))
+			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Classname))
 			{
-				if (config.sName[0] && config.sDesc[0])
-					CPrintToChat(iClient, "{immortal}%t: %t", config.sName, config.sDesc);
+				if (weapon.sName[0] && weapon.sDesc[0])
+					CPrintToChat(iClient, "{immortal}%t: %t", weapon.sName, weapon.sDesc);
 			}
 		}
 	}
@@ -267,16 +267,16 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 		char sClassname[64];
 		GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
 
-		int iLength = g_aWeapons.Length;
+		int iLength = g_WeaponList.Length;
 		for (int i = 0; i < iLength; i++)
 		{
-			WeaponConfig config;
-			g_aWeapons.GetArray(i, config, sizeof(config));
+			WeaponConfig weapon;
+			g_WeaponList.GetArray(i, weapon, sizeof(weapon));
 
-			if (StrEqual(config.sClassname, sClassname))
+			if (StrEqual(weapon.sClassname, sClassname))
 			{
 				char sAttribs[32][32];
-				int iCount = ExplodeString(config.sAttrib, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
+				int iCount = ExplodeString(weapon.sAttrib, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
 				if (iCount > 1)
 					for (int j = 0; j < iCount; j += 2)
 						TF2Attrib_SetByDefIndex(iWeapon, StringToInt(sAttribs[j]), StringToFloat(sAttribs[j+1]));
@@ -284,31 +284,31 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 				continue;
 			}
 
-			if (config.iIndex == iIndex)
+			if (weapon.iIndex == iIndex)
 			{
 				// Check for prefab
-				if (config.iIndexPrefab >= 0)
+				if (weapon.iIndexPrefab >= 0)
 				{
-					int iPrefab = config.iIndexPrefab;
+					int iPrefab = weapon.iIndexPrefab;
 					for (int j = 0; j < iLength; j++)
 					{
-						g_aWeapons.GetArray(j, config, sizeof(config));
-						if (config.iIndex == iPrefab)
+						g_WeaponList.GetArray(j, weapon, sizeof(weapon));
+						if (weapon.iIndex == iPrefab)
 							break;
 					}
 				}
 
 				// See if there is weapon to replace
-				if (config.iIndexReplace >= 0)
+				if (weapon.iIndexReplace >= 0)
 				{
-					iIndex = config.iIndexReplace;
+					iIndex = weapon.iIndexReplace;
 					TF2_RemoveWeaponSlot(iClient, iSlot);
 					iWeapon = TF2_CreateAndEquipWeapon(iClient, iIndex);
 				}
 
 				// Apply attributes
 				char sAttribs[32][32];
-				int iCount = ExplodeString(config.sAttrib, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
+				int iCount = ExplodeString(weapon.sAttrib, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
 				if (iCount > 1)
 					for (int j = 0; j < iCount; j += 2)
 						TF2Attrib_SetByDefIndex(iWeapon, StringToInt(sAttribs[j]), StringToFloat(sAttribs[j+1]));
@@ -388,11 +388,11 @@ void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 
 		if (iVictim != iAttacker && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker))
 		{
-			WeaponConfig config;
-			if (WeaponConfig_GetByItemdef(event.GetInt("weapon_def_index"), config) && config.iKillComboCrit)
+			WeaponConfig weapon;
+			if (g_WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
 			{
 				g_Player[iAttacker].iKillComboCount++;
-				if (g_Player[iAttacker].iKillComboCount == config.iKillComboCrit)
+				if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
 					CPrintToChat(iAttacker, "%t", "Chat_KillComboCritCharged");
 			}
 		}

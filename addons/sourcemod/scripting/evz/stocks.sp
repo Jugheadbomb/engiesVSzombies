@@ -191,11 +191,11 @@ bool IsAllowedToBuildSentry(int iClient)
 		if (iWeapon == -1)
 			continue;
 
-		WeaponConfig config;
-		if (WeaponConfig_GetByEntity(iWeapon, config, Value_Classname) && config.bSentry)
+		WeaponConfig weapon;
+		if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Classname) && weapon.bSentry)
 			return true;
 
-		if (WeaponConfig_GetByEntity(iWeapon, config, Value_Index) && config.bSentry)
+		if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.bSentry)
 			return true;
 	}
 

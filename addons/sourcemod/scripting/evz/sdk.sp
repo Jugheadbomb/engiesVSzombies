@@ -1,6 +1,5 @@
 static Handle g_hSDKEquipWearable;
 static Handle g_hSDKSetSpeed;
-static Handle g_hSDKGetMaxAmmo;
 static DynamicHook g_DHookShouldTransmit;
 static DynamicHook g_DHookCanBeUpgraded;
 static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
@@ -25,15 +24,6 @@ void SDK_Init()
 	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
 	if (!(g_hSDKSetSpeed = EndPrepSDKCall()))
 		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
-
-	// This call gets the weapon max ammo
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::GetMaxAmmo");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	if (!(g_hSDKGetMaxAmmo = EndPrepSDKCall()))
-		LogMessage("Failed to create call: CTFPlayer::GetMaxAmmo!");
 
 	g_DHookShouldTransmit = DynamicHook.FromConf(hEVZ, "CBaseEntity::ShouldTransmit");
 	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
@@ -139,9 +129,4 @@ void SDK_EquipWearable(int iClient, int iWearable)
 void SDK_SetSpeed(int iClient)
 {
 	SDKCall(g_hSDKSetSpeed, iClient);
-}
-
-int SDK_GetMaxAmmo(int iClient, int iAmmoType)
-{
-	return SDKCall(g_hSDKGetMaxAmmo, iClient, iAmmoType, -1);
 }

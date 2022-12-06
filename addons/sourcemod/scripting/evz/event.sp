@@ -324,9 +324,9 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 		int iAmmoType = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType");
 		if (iAmmoType > -1)
 		{
-			int iMaxAmmo = SDK_GetMaxAmmo(iClient, iAmmoType);
-			if (iMaxAmmo > 0)
-				SetEntProp(iClient, Prop_Send, "m_iAmmo", iMaxAmmo, 4, iAmmoType);
+			// Reset ammo before GivePlayerAmmo gives back properly
+			SetEntProp(iClient, Prop_Send, "m_iAmmo", 0, _, iAmmoType);
+			GivePlayerAmmo(iClient, 9999, iAmmoType, true);
 		}
 
 		// This will refresh health max calculation and other attributes

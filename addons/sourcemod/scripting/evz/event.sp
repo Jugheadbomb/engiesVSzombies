@@ -16,7 +16,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	SendEntityInput("team_control_point_master", "Disable");
 	SendEntityInput("mapobj_cart_dispenser", "Disable");
 	SendEntityInput("trigger_capture_area", "Disable");
-	SendEntityInput("func_areaportal", "Open");
 	SendEntityInput("func_capturezone", "Disable");
 	SendEntityInput("func_regenerate", "Disable");
 	SendEntityInput("func_respawnroomvisualizer", "Disable");
@@ -30,19 +29,28 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	}
 
 	iEntity = -1;
+	while ((iEntity = FindEntityByClassname(iEntity, "func_brush")) != -1)
+	{
+		char sBrushName[32];
+		GetEntPropString(iEntity, Prop_Data, "m_iName", sBrushName, sizeof(sBrushName));
+		if (StrContains(sBrushName, "door", false) != -1
+			|| StrContains(sBrushName, "gate", false) != -1
+			|| StrContains(sBrushName, "exit", false) != -1
+			|| StrContains(sBrushName, "grate", false) != -1
+			|| StrContains(sBrushName, "bullet", false) != -1
+			|| StrContains(sBrushName, "blocker", false) != -1)
+		{
+			RemoveEntity(iEntity);
+		}
+	}
+
+	SendEntityInput("func_areaportal", "Open");
+
+	iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) != -1)
 	{
 		SetVariantInt(1);
 		AcceptEntityInput(iEntity, "SetLocked");
-	}
-
-	iEntity = -1;
-	while ((iEntity = FindEntityByClassname(iEntity, "func_brush")) != -1)
-	{
-		char sTargetName[128];
-		GetEntPropString(iEntity, Prop_Data, "m_iName", sTargetName, sizeof(sTargetName));
-		if (sTargetName[0] && StrContains(sTargetName, "skybox", false) == -1)
-			AcceptEntityInput(iEntity, "Disable");
 	}
 
 	iEntity = FindEntityByClassname(-1, "team_control_point_master");

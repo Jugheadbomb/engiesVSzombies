@@ -321,6 +321,14 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 			TF2Attrib_SetByName(iWeapon, "vision opt in flags", float(TF_VISION_FILTER_HALLOWEEN));
 		}
 
+		int iAmmoType = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType");
+		if (iAmmoType > -1)
+		{
+			int iMaxAmmo = SDK_GetMaxAmmo(iClient, iAmmoType);
+			if (iMaxAmmo > 0)
+				SetEntProp(iClient, Prop_Send, "m_iAmmo", iMaxAmmo, 4, iAmmoType);
+		}
+
 		// This will refresh health max calculation and other attributes
 		TF2Attrib_ClearCache(iWeapon);
 	}

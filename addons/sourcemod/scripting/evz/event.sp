@@ -16,10 +16,15 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	SendEntityInput("team_control_point_master", "Disable");
 	SendEntityInput("mapobj_cart_dispenser", "Disable");
 	SendEntityInput("trigger_capture_area", "Disable");
+	SendEntityInput("func_areaportal", "Open");
 	SendEntityInput("func_capturezone", "Disable");
 	SendEntityInput("func_regenerate", "Disable");
 	SendEntityInput("func_respawnroomvisualizer", "Disable");
 	SendEntityInput("func_tracktrain", "Kill");
+
+	// Disable spells hud and other things
+	SetVariantString("SetUsingSpells(false)");
+	AcceptEntityInput(0, "RunScriptCode");
 
 	int iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "func_door")) != -1)
@@ -44,8 +49,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		}
 	}
 
-	SendEntityInput("func_areaportal", "Open");
-
 	iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) != -1)
 	{
@@ -58,13 +61,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	{
 		SetEntProp(iEntity, Prop_Data, "m_bScorePerCapture", false);
 		SetEntProp(iEntity, Prop_Data, "m_bSwitchTeamsOnWin", false);
-	}
-
-	iEntity = FindEntityByClassname(-1, "tf_logic_holiday");
-	if (iEntity > MaxClients)
-	{
-		SetVariantInt(0);
-		AcceptEntityInput(iEntity, "HalloweenSetUsingSpells");
 	}
 
 	if (g_nRoundState == EVZRoundState_Waiting)

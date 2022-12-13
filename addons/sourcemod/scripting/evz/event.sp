@@ -377,7 +377,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	}
 
 	// Santa hat
-	if (TF2_IsHolidayActive(TFHoliday_Christmas))
+	if (g_ConvarInfo.LookupBool("evz_holiday_things") && TF2_IsHolidayActive(TFHoliday_Christmas))
 		TF2_CreateAndEquipWeapon(iClient, SANTA_HAT);
 
 	BonusRound_PlayerSpawn(iClient);

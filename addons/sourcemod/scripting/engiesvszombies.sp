@@ -78,141 +78,9 @@ enum EVZRoundState
 	EVZRoundState_End
 };
 
-enum FindValue
-{
-	Value_Index = 0,
-	Value_Classname
-};
-
-methodmap WeaponList < ArrayList
-{
-	public WeaponList()
-	{
-		return view_as<WeaponList>(new ArrayList(sizeof(WeaponConfig)));
-	}
-
-	public void LoadSection(KeyValues kv)
-	{
-		this.Clear();
-
-		if (kv.JumpToKey("weapons", false))
-		{
-			if (kv.GotoFirstSubKey())
-			{
-				do
-				{
-					WeaponConfig weapon;
-					if (weapon.ReadFromKv(kv))
-						this.PushArray(weapon, sizeof(weapon));
-				}
-				while (kv.GotoNextKey());
-				kv.GoBack();
-			}
-			kv.GoBack();
-		}
-	}
-
-	public bool GetByEntity(int iWeapon, WeaponConfig weapon, FindValue findval)
-	{
-		switch (findval)
-		{
-			case Value_Index:
-			{
-				int index = GetEntProp(iWeapon, Prop_Send, "m_iItemDefinitionIndex");
-				return this.GetByDefIndex(index, weapon);
-			}
-			case Value_Classname:
-			{
-				char sClassname[64];
-				GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
-				return this.GetByClassname(sClassname, weapon);
-			}
-		}
-
-		return false;
-	}
-
-	public bool GetByDefIndex(int index, WeaponConfig weapon)
-	{
-		int i = this.FindValue(index, WeaponConfig::iIndex);
-		if (i != -1)
-			return !!this.GetArray(i, weapon);
-
-		return false;
-	}
-
-	public bool GetByClassname(const char[] sClassname, WeaponConfig weapon)
-	{
-		for (int i = 0; i < this.Length; i++)
-		{
-			if (!this.GetArray(i, weapon, sizeof(weapon)))
-				continue;
-
-			if (StrEqual(weapon.sClassname, sClassname, false))
-				return true;
-		}
-
-		return false;
-	}
-}
-
-methodmap RoundList < ArrayList
-{
-	public RoundList()
-	{
-		return view_as<RoundList>(new ArrayList(sizeof(RoundConfig)));
-	}
-
-	public void LoadSection(KeyValues kv)
-	{
-		this.Clear();
-
-		if (kv.JumpToKey("bonusrounds", false))
-		{
-			if (kv.GotoFirstSubKey())
-			{
-				do
-				{
-					RoundConfig round;
-					if (round.ReadFromKv(kv))
-						this.PushArray(round, sizeof(round));
-				}
-				while (kv.GotoNextKey());
-				kv.GoBack();
-			}
-			kv.GoBack();
-		}
-	}
-
-	public bool GetRandom(RoundConfig round)
-	{
-		if (this.Length > 0)
-			return !!this.GetArray(GetURandomInt() % this.Length, round, sizeof(round));
-
-		return false;
-	}
-
-	public bool GetCurrent(RoundConfig round)
-	{
-		if (g_nBonusRound == BonusRound_None)
-			return false;
-
-		int index = this.FindValue(g_nBonusRound, RoundConfig::id);
-		if (index != -1)
-			return !!this.GetArray(index, round, sizeof(round));
-
-		return false;
-	}
-}
-
-WeaponList g_WeaponList;
-RoundList g_RoundList;
-ConvarInfo g_ConvarInfo;
-
 #include "evz/config.sp"
 #include "evz/bonusround.sp"
 #include "evz/console.sp"
-#include "evz/convar.sp"
 #include "evz/event.sp"
 #include "evz/include.sp"
 #include "evz/menu.sp"
@@ -256,7 +124,6 @@ public void OnPluginStart()
 
 	Config_Init();
 	Console_Init();
-	ConVar_Init();
 	Event_Init();
 	SDK_Init();
 

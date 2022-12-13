@@ -319,12 +319,6 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 			}
 		}
 
-		if (iSlot == WeaponSlot_Melee)
-		{
-			// Allow see zombie souls
-			TF2Attrib_SetByName(iWeapon, "vision opt in flags", float(TF_VISION_FILTER_HALLOWEEN));
-		}
-
 		int iAmmoType = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType");
 		if (iAmmoType > -1)
 		{
@@ -375,6 +369,9 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 			}
 		}
 	}
+
+	// Allow see zombie souls
+	AddVision(iClient, TF_VISION_FILTER_HALLOWEEN);
 
 	// Santa hat
 	if (g_ConvarInfo.LookupBool("evz_holiday_things") && TF2_IsHolidayActive(TFHoliday_Christmas))

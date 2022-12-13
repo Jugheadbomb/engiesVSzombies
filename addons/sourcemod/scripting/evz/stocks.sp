@@ -237,3 +237,28 @@ void PrepareSound(const char[] sSound)
 	Format(sBuffer, sizeof(sBuffer), "sound/%s", sSound);
 	AddFileToDownloadsTable(sBuffer);
 }
+
+void AddVision(int iClient, int iFlag)
+{
+	float flVal = 0.0;
+
+	Address pAttrib = TF2Attrib_GetByDefIndex(iClient, ATTRIB_VISION);
+	if (pAttrib)
+		flVal = TF2Attrib_GetValue(pAttrib);
+
+	flVal = float(RoundToNearest(flVal) | iFlag);
+	TF2Attrib_SetByDefIndex(iClient, ATTRIB_VISION, flVal);
+}
+
+void RemoveVision(int iClient, int iFlag)
+{
+	float flVal = 0.0;
+
+	Address pAttrib = TF2Attrib_GetByDefIndex(iClient, ATTRIB_VISION);
+	if (pAttrib)
+	{
+		flVal = TF2Attrib_GetValue(pAttrib);
+		flVal = float(RoundToNearest(flVal) & ~iFlag);
+		TF2Attrib_SetByDefIndex(iClient, ATTRIB_VISION, flVal);
+	}
+}

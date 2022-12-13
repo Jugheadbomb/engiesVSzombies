@@ -175,10 +175,7 @@ void BonusRound_PlayerSpawn(int iClient)
 		}
 		case BonusRound_CuriousFeeling:
 		{
-			int iMelee = GetPlayerWeaponSlot(iClient, WeaponSlot_Melee);
-			if (iMelee > MaxClients)
-				TF2Attrib_SetByName(iMelee, "vision opt in flags", float(TF_VISION_FILTER_PYRO));
-
+			AddVision(iClient, TF_VISION_FILTER_PYRO);
 			TF2Attrib_SetByName(iClient, "voice pitch scale", 1.5);
 			TF2Attrib_SetByName(iClient, "head scale", 0.5);
 		}
@@ -211,10 +208,7 @@ void BonusRound_ResetClient(int iClient)
 		}
 		case BonusRound_CuriousFeeling:
 		{
-			int iMelee = GetPlayerWeaponSlot(iClient, WeaponSlot_Melee);
-			if (iMelee > MaxClients)
-				TF2Attrib_SetByName(iMelee, "vision opt in flags", float(TF_VISION_FILTER_HALLOWEEN));
-
+			RemoveVision(iClient, TF_VISION_FILTER_PYRO);
 			TF2Attrib_RemoveByName(iClient, "voice pitch scale");
 			TF2Attrib_RemoveByName(iClient, "head scale");
 		}

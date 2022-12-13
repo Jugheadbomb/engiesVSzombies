@@ -207,6 +207,7 @@ methodmap RoundList < ArrayList
 
 WeaponList g_WeaponList;
 RoundList g_RoundList;
+ConvarInfo g_ConvarInfo;
 
 #include "evz/config.sp"
 #include "evz/bonusround.sp"
@@ -272,12 +273,11 @@ public void OnPluginStart()
 	g_ConvarInfo.Create("evz_zombie_boost_color", "144 238 144 255", "Zombies render color when boosted");
 	g_ConvarInfo.Create("evz_zombie_doublejump_height", "280.0", "Zombies double jump height", _, true, 0.0);
 	g_ConvarInfo.Create("evz_zombie_doublejump_height_boost", "380.0", "Zombies double jump height when boosted", _, true, 0.0);
-	g_ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things on christmas/halloween", _, true, 0.0, true, 1.0);
+	g_ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things", _, true, 0.0, true, 1.0);
 
 	RegConsoleCmd("sm_evz", Command_MainMenu, "Display main menu of gamemode");
 	RegAdminCmd("sm_evz_startbonus", Command_StartBonus, ADMFLAG_CONVARS, "Start random bonus round, or force by number");
 
-	AutoExecConfig(true, "engiesvszombies");
 	LoadTranslations("engiesvszombies.phrases");
 
 	for (int iClient = 1; iClient <= MaxClients; iClient++)

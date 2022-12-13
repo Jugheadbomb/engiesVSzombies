@@ -5,6 +5,34 @@ methodmap ConvarInfo < StringMap
 		return view_as<ConvarInfo>(new StringMap());
 	}
 
+	public void LoadSection(KeyValues kv)
+	{
+		if (kv.JumpToKey("cvars", false))
+		{
+			if (kv.GotoFirstSubKey(false))
+			{
+				do
+				{
+					char sName[128];
+					char sValue[256];
+
+					kv.GetSectionName(sName, sizeof(sName));
+					kv.GetString(NULL_STRING, sValue, sizeof(sValue), "");
+
+					// Set value to StringMap and convar
+					this.SetString(sName, sValue);
+
+					ConVar convar = FindConVar(sName);
+					if (convar)
+						convar.SetString(sValue);
+				}
+				while (kv.GotoNextKey(false));
+				kv.GoBack();
+			}
+			kv.GoBack();
+		}
+	}
+
 	public ConVar Create(const char[] sName, const char[] sValue, const char[] sDesp, int iFlags=0, bool bMin=false, float flMin=0.0, bool bMax=false, float flMax=0.0)
 	{
 		ConVar convar = CreateConVar(sName, sValue, sDesp, iFlags, bMin, flMin, bMax, flMax);
@@ -56,8 +84,6 @@ methodmap ConvarInfo < StringMap
 		return true;
 	}
 }
-
-ConvarInfo g_ConvarInfo;
 
 void ConVar_Init()
 {

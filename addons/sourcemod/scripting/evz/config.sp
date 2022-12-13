@@ -87,6 +87,7 @@ void Config_Refresh()
 
 	g_WeaponList.LoadSection(kv);
 	g_RoundList.LoadSection(kv);
+	g_ConvarInfo.LoadSection(kv);
 	delete kv;
 }
 

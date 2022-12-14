@@ -175,7 +175,9 @@ void BonusRound_PlayerSpawn(int iClient)
 		}
 		case BonusRound_CuriousFeeling:
 		{
+			RemoveVision(iClient, TF_VISION_FILTER_HALLOWEEN);
 			AddVision(iClient, TF_VISION_FILTER_PYRO);
+
 			TF2Attrib_SetByName(iClient, "voice pitch scale", 1.5);
 			TF2Attrib_SetByName(iClient, "head scale", 0.5);
 		}
@@ -209,6 +211,8 @@ void BonusRound_ResetClient(int iClient)
 		case BonusRound_CuriousFeeling:
 		{
 			RemoveVision(iClient, TF_VISION_FILTER_PYRO);
+			AddVision(iClient, TF_VISION_FILTER_HALLOWEEN);
+
 			TF2Attrib_RemoveByName(iClient, "voice pitch scale");
 			TF2Attrib_RemoveByName(iClient, "head scale");
 		}

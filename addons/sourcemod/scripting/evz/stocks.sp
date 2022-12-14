@@ -262,3 +262,16 @@ void RemoveVision(int iClient, int iFlag)
 		TF2Attrib_SetByDefIndex(iClient, ATTRIB_VISION, flVal);
 	}
 }
+
+void TE_Particle(int iEntity, const char[] sParticle, bool bAttach)
+{
+	static int iTable = INVALID_STRING_TABLE;
+	if (iTable == INVALID_STRING_TABLE)
+		iTable = FindStringTable("ParticleEffectNames");
+
+	TE_Start("TFParticleEffect");
+	TE_WriteNum("entindex", iEntity);
+	TE_WriteNum("m_iParticleSystemIndex", FindStringIndex(iTable, sParticle));
+	TE_WriteNum("m_iAttachType", view_as<int>(bAttach));
+	TE_SendToAll();
+}

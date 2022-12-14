@@ -336,6 +336,7 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 				vecVel[2] = g_ConvarInfo.LookupFloat("evz_zombie_doublejump_height");
 
 			TeleportEntity(iClient, NULL_VECTOR, NULL_VECTOR, vecVel);
+			TE_Particle(iClient, "doublejump_puff", true);
 		}
 		else if (iFlags & FL_ONGROUND)
 			iJumps[iClient] = 0;

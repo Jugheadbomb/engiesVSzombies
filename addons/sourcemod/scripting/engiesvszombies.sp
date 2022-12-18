@@ -762,7 +762,7 @@ Action Command_RefreshConfig(int iClient, int iArgc)
 {
 	Config_Refresh();
 
-	CPrintToChatAll("{immortal}[{darkorange}EVZ{immortal}] %N refreshed EVZ config.");
+	CPrintToChatAll("{immortal}[{darkorange}EVZ{immortal}] %N refreshed EVZ config.", iClient);
 	return Plugin_Handled;
 }
 

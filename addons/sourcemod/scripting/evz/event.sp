@@ -373,18 +373,26 @@ void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 	
 	int iAttacker = GetClientOfUserId(event.GetInt("attacker"));
 
+	char sInflictor[64];
+	int iInflictor = event.GetInt("inflictor_entindex");
+	if (iInflictor > MaxClients)
+		GetEntityClassname(iInflictor, sInflictor, sizeof(sInflictor));
+
 	if (IsZombie(iVictim))
 	{
 		RequestFrame(Frame_CheckZombieBypass, iVictim);
 
 		if (iVictim != iAttacker && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker))
 		{
-			WeaponConfig weapon;
-			if (g_WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
+			if (!StrEqual(sInflictor, "obj_sentrygun", false)) // Not sentry kill
 			{
-				g_Player[iAttacker].iKillComboCount++;
-				if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
-					CPrintToChat(iAttacker, "%t", "Chat_KillComboCritCharged");
+				WeaponConfig weapon;
+				if (g_WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
+				{
+					g_Player[iAttacker].iKillComboCount++;
+					if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+						CPrintToChat(iAttacker, "%t", "Chat_KillComboCritCharged");
+				}
 			}
 		}
 	}

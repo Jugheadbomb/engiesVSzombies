@@ -639,7 +639,7 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 				iDamageType |= DMG_CRIT;
 				flDamage *= 3.0;
 
-				g_Player[iAttacker].iKillComboCount = 0;
+				g_Player[iAttacker].iKillComboCount = -1; // Set to -1, player_death hook will increment this by one, so it resets to 0
 				return Plugin_Changed;
 			}
 		}

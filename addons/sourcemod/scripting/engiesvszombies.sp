@@ -144,6 +144,7 @@ public void OnPluginStart()
 	g_ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things", _, true, 0.0, true, 1.0);
 
 	RegConsoleCmd("sm_evz", Command_MainMenu, "Display main menu of gamemode");
+	RegAdminCmd("sm_evz_refresh", Command_RefreshConfig, ADMFLAG_CONVARS, "Refresh config with weapon balances, bonus rounds and cvars");
 	RegAdminCmd("sm_evz_startbonus", Command_StartBonus, ADMFLAG_CONVARS, "Start random bonus round, or force by number");
 
 	LoadTranslations("engiesvszombies.phrases");
@@ -754,6 +755,14 @@ Action Command_MainMenu(int iClient, int iArgc)
 		return Plugin_Handled;
 
 	Menu_DisplayMain(iClient);
+	return Plugin_Handled;
+}
+
+Action Command_RefreshConfig(int iClient, int iArgc)
+{
+	Config_Refresh();
+
+	CPrintToChatAll("{immortal}[{darkorange}EVZ{immortal}] %N refreshed EVZ config.");
 	return Plugin_Handled;
 }
 

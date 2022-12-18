@@ -260,3 +260,8 @@ void TE_Particle(int iEntity, const char[] sParticle, bool bAttach)
 	TE_WriteNum("m_iAttachType", view_as<int>(bAttach));
 	TE_SendToAll();
 }
+
+int min(int a, int b)
+{
+	return (a < b) ? a : b;
+}

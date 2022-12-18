@@ -522,6 +522,41 @@ Action Timer_Main(Handle hTimer)
 			ShowHudText(iClient, CHANNEL_INFO, "%t", "Hud_ZombiesBoosted");
 	}
 
+	// Handle sentry rules
+	// - Mini and Norm sentry starts with 60 ammo and decays to 0, then self destructs
+	// - No sentry can be upgraded
+	int iSentry = -1;
+	while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) != -1)
+	{
+		bool bBuilding = GetEntProp(iSentry, Prop_Send, "m_bBuilding") == 1;
+		bool bPlacing = GetEntProp(iSentry, Prop_Send, "m_bPlacing") == 1;
+		bool bCarried = GetEntProp(iSentry, Prop_Send, "m_bCarried") == 1;
+		bool bInfAmmo = view_as<bool>(GetEntProp(iSentry, Prop_Data, "m_spawnflags") & 8);
+
+		if (!bInfAmmo && !bBuilding && !bPlacing && !bCarried)
+		{
+			int iAmmo = GetEntProp(iSentry, Prop_Send, "m_iAmmoShells");
+			if (iAmmo > 0)
+			{
+				iAmmo = min(60, (iAmmo - 1));
+				SetEntProp(iSentry, Prop_Send, "m_iAmmoShells", iAmmo);
+				SetEntProp(iSentry, Prop_Send, "m_iUpgradeMetal", 0);
+			}
+			else
+			{
+				SetVariantInt(GetEntProp(iSentry, Prop_Send, "m_iMaxHealth"));
+				AcceptEntityInput(iSentry, "RemoveHealth");
+			}
+		}
+
+		int iLevel = GetEntProp(iSentry, Prop_Send, "m_iHighestUpgradeLevel");
+		if (!bInfAmmo && iLevel > 1)
+		{
+			SetVariantInt(GetEntProp(iSentry, Prop_Send, "m_iMaxHealth"));
+			AcceptEntityInput(iSentry, "RemoveHealth");
+		}
+	}
+
 	return Plugin_Continue;
 }
 

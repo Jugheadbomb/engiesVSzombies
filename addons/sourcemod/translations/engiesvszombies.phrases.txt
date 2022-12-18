@@ -176,8 +176,8 @@
 	}
 	"Weapon_RescueRanger_Desc"
 	{
-		"en"		"{green}Mini-sentry, {red}Damage: -40%%, Sentry radius: -35%%, Sentry damage: -50%%, Sentry attack speed: -40%%"
-		"ru"		"{green}Мини-турель, {red}Урон: -40%%, Радиус турели: -35%%, Урон турели: -50%%, Скорость атаки турели: -40%%"
+		"en"		"{green}Mini-sentry, {red}Damage: -40%%, Sentry radius: -35%%, Sentry damage: -50%%, Sentry attack speed: -30%%\nSentry self-destructs over time"
+		"ru"		"{green}Мини-турель, {red}Урон: -40%%, Радиус турели: -35%%, Урон турели: -50%%, Скорость атаки турели: -30%%\nТурель самоуничтожается со временем"
 	}
 
 	"Weapon_PanicAttack"

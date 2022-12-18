@@ -157,11 +157,7 @@ void BonusRound_Reset()
 
 void BonusRound_PlayerSpawn(int iClient)
 {
-	SetEntityGravity(iClient, 1.0);
-	TF2Attrib_RemoveByName(iClient, "health regen");
-	TF2Attrib_RemoveByName(iClient, "voice pitch scale");
-	TF2Attrib_RemoveByName(iClient, "head scale");
-	TF2Attrib_RemoveByName(iClient, "kill forces attacker to laugh");
+	BonusRound_ResetClient(iClient);
 
 	switch (g_nBonusRound)
 	{
@@ -199,26 +195,12 @@ void BonusRound_PlayerSpawn(int iClient)
 
 void BonusRound_ResetClient(int iClient)
 {
-	switch (g_nBonusRound)
-	{
-		case BonusRound_None: return;
-		case BonusRound_LowGravity, BonusRound_HighGravity: SetEntityGravity(iClient, 1.0);
-		case BonusRound_NoDispensers:
-		{
-			if (IsSurvivor(iClient))
-				TF2Attrib_RemoveByName(iClient, "health regen");
-		}
-		case BonusRound_CuriousFeeling:
-		{
-			RemoveVision(iClient, TF_VISION_FILTER_PYRO);
-			AddVision(iClient, TF_VISION_FILTER_HALLOWEEN);
+	SetEntityGravity(iClient, 1.0);
+	TF2Attrib_RemoveByName(iClient, "health regen");
+	TF2Attrib_RemoveByName(iClient, "voice pitch scale");
+	TF2Attrib_RemoveByName(iClient, "head scale");
+	TF2Attrib_RemoveByName(iClient, "kill forces attacker to laugh");
 
-			TF2Attrib_RemoveByName(iClient, "voice pitch scale");
-			TF2Attrib_RemoveByName(iClient, "head scale");
-		}
-		case BonusRound_MurderousJoy:
-		{
-			TF2Attrib_RemoveByName(iClient, "kill forces attacker to laugh");
-		}
-	}
+	RemoveVision(iClient, TF_VISION_FILTER_PYRO);
+	AddVision(iClient, TF_VISION_FILTER_HALLOWEEN);
 }

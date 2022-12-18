@@ -501,23 +501,7 @@ Action Timer_Main(Handle hTimer)
 					continue;
 
 				if (IsZombie(iClient))
-				{
-					TF2_SetSpeed(iClient, g_ConvarInfo.LookupFloat("evz_zombie_speed_boost"));
-
-					int iColor[4];
-					if (g_ConvarInfo.LookupIntArray("evz_zombie_boost_color", iColor, sizeof(iColor)))
-					{
-						SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
-						SetEntityRenderColor(iClient, iColor[0], iColor[1], iColor[2], iColor[3]);
-
-						int iSoul = GetVoodooSoul(iClient);
-						if (iSoul > MaxClients)
-						{
-							SetEntityRenderMode(iSoul, RENDER_TRANSCOLOR);
-							SetEntityRenderColor(iSoul, iColor[0], iColor[1], iColor[2], iColor[3]);
-						}
-					}
-				}
+					BoostZombie(iClient);
 			}
 
 			Forward_OnZombiesBoost();
@@ -859,6 +843,32 @@ void CheckZombieBypass(int iClient)
 	{
 		g_Player[iClient].bForceZombieStart = true;
 		g_cForceZombieStart.Set(iClient, "1");
+	}
+}
+
+void BoostZombie(int iClient)
+{
+	TF2_SetSpeed(iClient, g_ConvarInfo.LookupFloat("evz_zombie_speed_boost"));
+
+	int iColor[4];
+	if (g_ConvarInfo.LookupIntArray("evz_zombie_boost_color", iColor, sizeof(iColor)))
+	{
+		SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
+		SetEntityRenderColor(iClient, iColor[0], iColor[1], iColor[2], iColor[3]);
+
+		int iSoul = -1;
+		while ((iSoul = FindEntityByClassname(iSoul, "tf_wearable")) != -1)
+		{
+			if (GetEntPropEnt(iSoul, Prop_Send, "m_hOwnerEntity") == iClient)
+			{
+				if (GetEntProp(iSoul, Prop_Send, "m_iItemDefinitionIndex") == GetClassVoodooDefIndex(TF2_GetPlayerClass(iClient)))
+				{
+					SetEntityRenderMode(iSoul, RENDER_TRANSCOLOR);
+					SetEntityRenderColor(iSoul, iColor[0], iColor[1], iColor[2], iColor[3]);
+					break;
+				}
+			}
+		}
 	}
 }
 

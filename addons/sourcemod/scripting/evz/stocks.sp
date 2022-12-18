@@ -146,21 +146,6 @@ void CheckClientWeapons(int iClient)
 	}
 }
 
-int GetVoodooSoul(int iClient)
-{
-	int iWearable = -1;
-	while ((iWearable = FindEntityByClassname(iWearable, "tf_wearable")) != -1)
-	{
-		if (GetEntPropEnt(iWearable, Prop_Send, "m_hOwnerEntity") == iClient)
-		{
-			if (GetEntProp(iWearable, Prop_Send, "m_iItemDefinitionIndex") == GetClassVoodooDefIndex(TF2_GetPlayerClass(iClient)))
-				return iWearable;
-		}
-	}
-
-	return -1;
-}
-
 int GetClassVoodooDefIndex(TFClassType nClass)
 {
 	return g_iVoodooIndex[view_as<int>(nClass)];

@@ -337,23 +337,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 		TF2_CreateAndEquipWeapon(iClient, GetClassVoodooDefIndex(nClass), "450 ; 1");
 
 		if (g_nRoundState == EVZRoundState_Boost)
-		{
-			TF2_SetSpeed(iClient, g_ConvarInfo.LookupFloat("evz_zombie_speed_boost"));
-
-			int iColor[4];
-			if (g_ConvarInfo.LookupIntArray("evz_zombie_boost_color", iColor, sizeof(iColor)))
-			{
-				SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
-				SetEntityRenderColor(iClient, iColor[0], iColor[1], iColor[2], iColor[3]);
-
-				int iSoul = GetVoodooSoul(iClient);
-				if (iSoul > MaxClients)
-				{
-					SetEntityRenderMode(iSoul, RENDER_TRANSCOLOR);
-					SetEntityRenderColor(iSoul, iColor[0], iColor[1], iColor[2], iColor[3]);
-				}
-			}
-		}
+			BoostZombie(iClient);
 		else if (g_nRoundState == EVZRoundState_Setup)
 			SetEntityMoveType(iClient, MOVETYPE_NONE);
 	}

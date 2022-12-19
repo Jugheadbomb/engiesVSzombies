@@ -1,5 +1,20 @@
 #define BONUSROUND_ROLLSOUND "evz/bonusround.wav"
 
+// Default weapon index for each class and slot 
+static int g_iDefaultWeaponIndex[][] =
+{
+	{-1, -1, -1, -1, -1, -1},	// Unknown
+	{13, 23, 0, -1, -1, -1},	// Scout
+	{14, 16, 3, -1, -1, -1},	// Sniper
+	{18, 10, 6, -1, -1, -1},	// Soldier
+	{19, 20, 1, -1, -1, -1},	// Demoman
+	{17, 29, 8, -1, -1, -1},	// Medic
+	{15, 11, 5, -1, -1, -1},	// Heavy
+	{21, 12, 2, -1, -1, -1},	// Pyro
+	{24, 735, 4, 27, 30, -1},	// Spy
+	{9, 22, 7, 25, 26, 28},		// Engineer
+};
+
 bool g_bUsedVest[TF_MAXPLAYERS];
 
 void BonusRound_Precache()
@@ -206,20 +221,34 @@ void BonusRound_PlayerSpawn(int iClient)
 		{
 			int iIndex = -1;
 			TFClassType nClass = TF2_GetPlayerClass(iClient);
-
-			TF2_RemoveAllWeapons(iClient);
-
 			if (IsSurvivor(iClient))
 			{
-				for (int i = WeaponSlot_Primary; i <= WeaponSlot_BuilderEngie; i++)
+				for (int i = WeaponSlot_Primary; i <= WeaponSlot_Melee; i++)
 				{
+					TF2_RemoveWeaponSlot(iClient, i);
+
 					iIndex = g_iDefaultWeaponIndex[view_as<int>(nClass)][i];
 					if (iIndex >= 0)
-						TF2_CreateAndEquipWeapon(iClient, iIndex);
+					{
+						int iWeapon = TF2_CreateAndEquipWeapon(iClient, iIndex);
+
+						int iAmmoType = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType");
+						if (iAmmoType > -1)
+						{
+							// Reset ammo before GivePlayerAmmo gives back properly
+							SetEntProp(iClient, Prop_Send, "m_iAmmo", 0, _, iAmmoType);
+							GivePlayerAmmo(iClient, 9999, iAmmoType, true);
+						}
+
+						if (i == WeaponSlot_Primary)
+							TF2_SwitchActiveWeapon(iClient, iWeapon);
+					}
 				}
 			}
 			else if (IsZombie(iClient))
 			{
+				TF2_RemoveAllWeapons(iClient);
+
 				iIndex = g_iDefaultWeaponIndex[view_as<int>(nClass)][WeaponSlot_Melee];
 				if (iIndex >= 0)
 					TF2_CreateAndEquipWeapon(iClient, iIndex);

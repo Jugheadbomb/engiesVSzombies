@@ -21,6 +21,7 @@ enum BonusRound
 	BonusRound_NoUpgrades,
 	BonusRound_TeamSwap,
 	BonusRound_CompetitiveRules,
+	BonusRound_DeafEars,
 
 	BonusRound_Count
 };

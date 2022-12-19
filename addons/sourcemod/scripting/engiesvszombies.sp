@@ -80,21 +80,6 @@ enum EVZRoundState
 	EVZRoundState_End
 };
 
-// Default weapon index for each class and slot
-int g_iDefaultWeaponIndex[][] =
-{
-	{-1, -1, -1, -1, -1, -1},	// Unknown
-	{13, 23, 0, -1, -1, -1},	// Scout
-	{14, 16, 3, -1, -1, -1},	// Sniper
-	{18, 10, 6, -1, -1, -1},	// Soldier
-	{19, 20, 1, -1, -1, -1},	// Demoman
-	{17, 29, 8, -1, -1, -1},	// Medic
-	{15, 11, 5, -1, -1, -1},	// Heavy
-	{21, 12, 2, -1, -1, -1},	// Pyro
-	{24, 735, 4, 27, 30, -1},	// Spy
-	{9, 22, 7, 25, 26, 28},		// Engineer
-};
-
 #include "evz/config.sp"
 #include "evz/bonusround.sp"
 #include "evz/console.sp"
@@ -135,6 +120,8 @@ public void OnPluginStart()
 	tf_use_fixed_weaponspreads = FindConVar("tf_use_fixed_weaponspreads");
 
 	g_cForceZombieStart = new Cookie("evz_forcezombiestart", "TrollFace", CookieAccess_Protected);
+
+	AddNormalSoundHook(SoundHook);
 
 	HookEntityOutput("func_respawnroom", "OnStartTouch", RespawnRoom_OnStartTouch);
 	HookEntityOutput("func_respawnroom", "OnEndTouch", RespawnRoom_OnEndTouch);
@@ -380,6 +367,30 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 	}
 
 	return Plugin_Continue;
+}
+
+Action SoundHook(int iClients[MAXPLAYERS], int &iNumClients, char sSound[PLATFORM_MAX_PATH], int &iClient, int &iChannel, float &flVolume, int &iLevel, int &iPitch, int &iFlags, char sSoundEntry[PLATFORM_MAX_PATH], int &iSeed)
+{
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
+		return Plugin_Continue;
+
+	Action action = Plugin_Continue;
+	if (g_nBonusRound == BonusRound_DeafEars)
+	{
+		for (int i = iNumClients - 1; i >= 0; i--)
+		{
+			if (TF2_GetClientTeam(iClients[i]) != TF2_GetClientTeam(iClient))
+			{
+				for (int j = i; j < iNumClients; j++)
+					iClients[j] = iClients[j + 1];
+
+				iNumClients--;
+				action = Plugin_Changed;
+			}
+		}
+	}
+
+	return action;
 }
 
 void RespawnRoom_OnStartTouch(const char[] sOutput, int iCaller, int iActivator, float flDelay)

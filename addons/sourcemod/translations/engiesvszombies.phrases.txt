@@ -458,6 +458,17 @@
 	"BonusRound_CompetitiveRules_Desc"
 	{
 		"en"		"No weapon balances or randomness!"
-		"ru"		"Нет балансов оружиЙ или случайностей!"
+		"ru"		"Нет балансов оружий или случайностей!"
+	}
+
+	"BonusRound_DeafEars"
+	{
+		"en"		"Deaf ears"
+		"ru"		"Глухие уши"
+	}
+	"BonusRound_DeafEars_Desc"
+	{
+		"en"		"Enemy team can no longer hear you!"
+		"ru"		"Вражеская команда больше не может слышать вас!"
 	}
 }

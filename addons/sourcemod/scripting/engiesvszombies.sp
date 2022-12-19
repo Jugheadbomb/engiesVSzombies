@@ -42,6 +42,7 @@ ConVar spec_freeze_time;
 ConVar mp_teams_unbalance_limit;
 ConVar mp_waitingforplayers_time;
 ConVar tf_boost_drain_time;
+ConVar tf_use_fixed_weaponspreads;
 
 Cookie g_cForceZombieStart;
 bool g_bLastSurvivor;
@@ -77,6 +78,21 @@ enum EVZRoundState
 	EVZRoundState_Active,
 	EVZRoundState_Boost,
 	EVZRoundState_End
+};
+
+// Default weapon index for each class and slot
+int g_iDefaultWeaponIndex[][] =
+{
+	{-1, -1, -1, -1, -1, -1},	// Unknown
+	{13, 23, 0, -1, -1, -1},	// Scout
+	{14, 16, 3, -1, -1, -1},	// Sniper
+	{18, 10, 6, -1, -1, -1},	// Soldier
+	{19, 20, 1, -1, -1, -1},	// Demoman
+	{17, 29, 8, -1, -1, -1},	// Medic
+	{15, 11, 5, -1, -1, -1},	// Heavy
+	{21, 12, 2, -1, -1, -1},	// Pyro
+	{24, 735, 4, 27, 30, -1},	// Spy
+	{9, 22, 7, 25, 26, 28},		// Engineer
 };
 
 #include "evz/config.sp"
@@ -116,6 +132,7 @@ public void OnPluginStart()
 	mp_teams_unbalance_limit = FindConVar("mp_teams_unbalance_limit");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	tf_boost_drain_time = FindConVar("tf_boost_drain_time");
+	tf_use_fixed_weaponspreads = FindConVar("tf_use_fixed_weaponspreads");
 
 	g_cForceZombieStart = new Cookie("evz_forcezombiestart", "TrollFace", CookieAccess_Protected);
 

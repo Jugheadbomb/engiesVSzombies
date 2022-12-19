@@ -449,4 +449,15 @@
 		"en"		"Team colors are swapped"
 		"ru"		"Цвета команд меняются местами"
 	}
+
+	"BonusRound_CompetitiveRules"
+	{
+		"en"		"Competitive rules"
+		"ru"		"Соревновательные правила"
+	}
+	"BonusRound_CompetitiveRules_Desc"
+	{
+		"en"		"No weapon balances or randomness!"
+		"ru"		"Нет балансов оружиЙ или случайностей!"
+	}
 }

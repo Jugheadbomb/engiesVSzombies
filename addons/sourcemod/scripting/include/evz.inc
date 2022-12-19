@@ -20,6 +20,7 @@ enum BonusRound
 	BonusRound_HotPotato,
 	BonusRound_NoUpgrades,
 	BonusRound_TeamSwap,
+	BonusRound_CompetitiveRules,
 
 	BonusRound_Count
 };

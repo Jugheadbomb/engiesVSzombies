@@ -116,6 +116,12 @@ void BonusRound_StartRound(BonusRound id)
 				SpawnClient(iClient, IsSurvivor(iClient) ? TFTeam_Zombie : TFTeam_Survivor);
 			}
 		}
+		case BonusRound_CompetitiveRules:
+		{
+			tf_use_fixed_weaponspreads.Flags &= ~FCVAR_NOTIFY;
+			tf_use_fixed_weaponspreads.BoolValue = true;
+			tf_use_fixed_weaponspreads.Flags |= FCVAR_NOTIFY;
+		}
 	}
 
 	g_nBonusRound = id;
@@ -143,6 +149,12 @@ void BonusRound_Reset()
 			TFTeam nTemp = TFTeam_Zombie;
 			TFTeam_Zombie = TFTeam_Survivor;
 			TFTeam_Survivor = nTemp;
+		}
+		case BonusRound_CompetitiveRules:
+		{
+			tf_use_fixed_weaponspreads.Flags &= ~FCVAR_NOTIFY;
+			tf_use_fixed_weaponspreads.BoolValue = false;
+			tf_use_fixed_weaponspreads.Flags |= FCVAR_NOTIFY;
 		}
 	}
 
@@ -189,6 +201,29 @@ void BonusRound_PlayerSpawn(int iClient)
 		case BonusRound_MurderousJoy:
 		{
 			TF2Attrib_SetByName(iClient, "kill forces attacker to laugh", 1.0);
+		}
+		case BonusRound_CompetitiveRules:
+		{
+			int iIndex = -1;
+			TFClassType nClass = TF2_GetPlayerClass(iClient);
+
+			TF2_RemoveAllWeapons(iClient);
+
+			if (IsSurvivor(iClient))
+			{
+				for (int i = WeaponSlot_Primary; i <= WeaponSlot_BuilderEngie; i++)
+				{
+					iIndex = g_iDefaultWeaponIndex[view_as<int>(nClass)][i];
+					if (iIndex >= 0)
+						TF2_CreateAndEquipWeapon(iClient, iIndex);
+				}
+			}
+			else if (IsZombie(iClient))
+			{
+				iIndex = g_iDefaultWeaponIndex[view_as<int>(nClass)][WeaponSlot_Melee];
+				if (iIndex >= 0)
+					TF2_CreateAndEquipWeapon(iClient, iIndex);
+			}
 		}
 	}
 }

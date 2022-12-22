@@ -13,19 +13,18 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	g_bLastSurvivor = false;
 
 	// Control entities
-	SendEntityInput("team_control_point_master", "Disable");
 	SendEntityInput("mapobj_cart_dispenser", "Disable");
 	SendEntityInput("trigger_capture_area", "Disable");
 	SendEntityInput("func_areaportal", "Open");
 	SendEntityInput("func_capturezone", "Disable");
 	SendEntityInput("func_regenerate", "Disable");
 	SendEntityInput("func_respawnroomvisualizer", "Disable");
-	SendEntityInput("func_tracktrain", "Kill");
 
 	// Disable spells hud and other things
 	SetVariantString("SetUsingSpells(false)");
 	AcceptEntityInput(0, "RunScriptCode");
 
+	// Disable doors
 	int iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "func_door")) != -1)
 	{
@@ -49,6 +48,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		}
 	}
 
+	// Lock control point
 	iEntity = -1;
 	while ((iEntity = FindEntityByClassname(iEntity, "team_control_point")) != -1)
 	{
@@ -56,11 +56,25 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		AcceptEntityInput(iEntity, "SetLocked");
 	}
 
+	// Fix team scoring type (set it as per round)
 	iEntity = FindEntityByClassname(-1, "team_control_point_master");
 	if (iEntity > MaxClients)
 	{
 		SetEntProp(iEntity, Prop_Data, "m_bScorePerCapture", false);
 		SetEntProp(iEntity, Prop_Data, "m_bSwitchTeamsOnWin", false);
+		SetEntProp(iEntity, Prop_Data, "m_bDisabled", true);
+	}
+
+	// Remove payload carts
+	iEntity = -1;
+	while ((iEntity = FindEntityByClassname(iEntity, "team_train_watcher")) != -1)
+	{
+		char sTrainName[64];
+		GetEntPropString(iEntity, Prop_Data, "m_iszTrain", sTrainName, sizeof(sTrainName));
+
+		int iTrain = SDK_FindEntityByName(0, sTrainName);
+		if (iTrain)
+			RemoveEntity(iTrain);
 	}
 
 	if (g_nRoundState == EVZRoundState_Waiting)

@@ -770,9 +770,6 @@ void Frame_SurvivorDeath(int iClient)
 		ClientCommand(iClient, "r_screenoverlay\"debug/yuv\"");
 		CreateTimer(3.0, Timer_Zombify, iClient, TIMER_FLAG_NO_MAPCHANGE);
 
-		TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
-		TF2_SetPlayerClass(iClient, TFClass_Zombie);
-
 		g_Player[iClient].flTimeStartAsZombie = GetGameTime();
 	}
 }

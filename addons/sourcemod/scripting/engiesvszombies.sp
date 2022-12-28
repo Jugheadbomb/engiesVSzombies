@@ -216,7 +216,7 @@ public void OnClientCookiesCached(int iClient)
 {
 	char sValue[8];
 	g_cForceZombieStart.Get(iClient, sValue, sizeof(sValue));
-	g_Player[iClient].bForceZombieStart = !!StringToInt(sValue);
+	g_Player[iClient].bForceZombieStart = sValue[0] ? !!StringToInt(sValue) : false;
 }
 
 public void OnClientDisconnect(int iClient)

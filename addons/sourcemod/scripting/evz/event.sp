@@ -77,6 +77,15 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			RemoveEntity(iTrain);
 	}
 
+	iEntity = -1;
+	while ((iEntity = FindEntityByClassname(iEntity, "prop_physics*")) != -1)
+	{
+		char sPropName[64];
+		GetEntPropString(iEntity, Prop_Data, "m_iName", sPropName, sizeof(sPropName));
+		if (StrContains(sPropName, "cart", false) != -1)
+			RemoveEntity(iEntity);
+	}
+
 	if (g_nRoundState == EVZRoundState_Waiting)
 		return;
 

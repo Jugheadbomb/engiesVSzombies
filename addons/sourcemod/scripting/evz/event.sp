@@ -72,7 +72,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		char sTrainName[64];
 		GetEntPropString(iEntity, Prop_Data, "m_iszTrain", sTrainName, sizeof(sTrainName));
 
-		int iTrain = SDK_FindEntityByName(0, sTrainName);
+		int iTrain = FindByClassTargetName("func_tracktrain", sTrainName);
 		if (iTrain)
 			RemoveEntity(iTrain);
 	}

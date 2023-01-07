@@ -35,12 +35,6 @@
 				"linux"		"@_ZN9CTFPlayer21TeamFortress_SetSpeedEv"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x1C\x53"
 			}
-			"CGlobalEntityList::FindEntityByName"
-			{
-				"library"	"server"
-				"linux"		"@_ZN17CGlobalEntityList16FindEntityByNameEP11CBaseEntityPKcS1_S1_S1_P17IEntityFindFilter"
-				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x2A\x56\x8B\xF1\x85\xDB\x74\x2A\x8A\x03"
-			}
 		}
 		"Functions"
 		{

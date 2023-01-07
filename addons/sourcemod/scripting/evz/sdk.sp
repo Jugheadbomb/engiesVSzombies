@@ -1,6 +1,5 @@
 static Handle g_hSDKEquipWearable;
 static Handle g_hSDKSetSpeed;
-static Handle g_hSDKFindEntityByName;
 static DynamicHook g_DHookShouldTransmit;
 static DynamicHook g_DHookCanBeUpgraded;
 static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
@@ -25,18 +24,6 @@ void SDK_Init()
 	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CTFPlayer::TeamFortress_SetSpeed");
 	if (!(g_hSDKSetSpeed = EndPrepSDKCall()))
 		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
-
-	StartPrepSDKCall(SDKCall_EntityList);
-	PrepSDKCall_SetFromConf(hEVZ, SDKConf_Signature, "CGlobalEntityList::FindEntityByName");
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL|VDECODE_FLAG_ALLOWWORLD);
-	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL|VDECODE_FLAG_ALLOWWORLD);
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL|VDECODE_FLAG_ALLOWWORLD);
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL|VDECODE_FLAG_ALLOWWORLD);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByValue);
-	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
-	if (!(g_hSDKFindEntityByName = EndPrepSDKCall()))
-		LogError("Failed to create call: CGlobalEntityList::FindEntityByName");
 
 	g_DHookShouldTransmit = DynamicHook.FromConf(hEVZ, "CBaseEntity::ShouldTransmit");
 	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
@@ -143,9 +130,4 @@ void SDK_EquipWearable(int iClient, int iWearable)
 void SDK_SetSpeed(int iClient)
 {
 	SDKCall(g_hSDKSetSpeed, iClient);
-}
-
-int SDK_FindEntityByName(int startentity, const char[] name, int searchingentity = 0, int activator = 0, int caller = 0)
-{
-	return SDKCall(g_hSDKFindEntityByName, startentity, name, searchingentity, activator, caller, 0);
 }

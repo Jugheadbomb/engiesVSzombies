@@ -265,3 +265,17 @@ int min(int a, int b)
 {
 	return (a < b) ? a : b;
 }
+
+int FindByClassTargetName(const char[] sClass, const char[] sTarget)
+{
+	char sName[64];
+	int iEntity = -1;
+	while ((iEntity = FindEntityByClassname(iEntity, sClass)) != -1)
+	{
+		GetEntPropString(iEntity, Prop_Data, "m_iName", sName, sizeof(sName));
+		if (strcmp(sTarget, sName) == 0)
+			return iEntity;
+	}
+
+	return -1;
+}

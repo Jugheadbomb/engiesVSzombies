@@ -4,7 +4,7 @@ Simple **Zombie Survival** gamemode	for Team Fortress 2
 
 ## Features
 - Customizable config for weapon balances
-- 10+ bonus rounds that make various changes to gameplay
+- 10+ bonus rounds that make various changes to gameplay (Thanks to Mikusch for his [ChaosModTF2](https://github.com/Mikusch/ChaosModTF2))
 - There are `zs_` maps for that gamemode, but it can be run on any map (`cp_`, `pl_`, `koth_` etc.)
 
 ## Commands

@@ -6,7 +6,6 @@ void Include_AskLoad()
 {
 	CreateNative("EVZ_GetSurvivorTeam", Native_GetSurvivorTeam);
 	CreateNative("EVZ_GetZombieTeam", Native_GetZombieTeam);
-	CreateNative("EVZ_GetBonusRound", Native_GetBonusRound);
 
 	g_hForwardZombiesBoost = new GlobalForward("EVZ_OnZombiesBoost", ET_Ignore);
 	g_hForwardZombiesRelease = new GlobalForward("EVZ_OnZombiesRelease", ET_Ignore);
@@ -21,11 +20,6 @@ public any Native_GetSurvivorTeam(Handle hPlugin, int iNumParams)
 public any Native_GetZombieTeam(Handle hPlugin, int iNumParams)
 {
 	return TFTeam_Zombie;
-}
-
-public any Native_GetBonusRound(Handle hPlugin, int iNumParams)
-{
-	return g_nBonusRound;
 }
 
 void Forward_OnZombiesRelease()

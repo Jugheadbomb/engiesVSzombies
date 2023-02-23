@@ -102,7 +102,6 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		g_Player[iClient].flTimeStartAsZombie = 0.0;
-		g_bUsedVest[iClient] = false;
 
 		if (IsClientInGame(iClient) && TF2_GetClientTeam(iClient) > TFTeam_Spectator)
 		{
@@ -127,7 +126,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			if (g_Player[iClient].bForceZombieStart)
 			{
 				// If player attempted to skip playing as zombie last time, force him to be in zombie team
-				CPrintToChat(iClient, "%t", "Chat_ForceZombieStart");
+				CPrintToChat(iClient, "%t", "#Chat_ForceZombieStart");
 				g_Player[iClient].bForceZombieStart = false;
 				g_cForceZombieStart.Set(iClient, "0");
 
@@ -203,7 +202,8 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		}
 	}
 
-	BonusRound_Reset();
+	BonusRound_Expire();
+
 	if (g_ConvarInfo.LookupBool("evz_bonus_rounds_enable") && GameRules_GetProp("m_nRoundsPlayed") >= 1)
 	{
 		if (GetURandomFloat() < g_ConvarInfo.LookupFloat("evz_bonus_rounds_chance"))
@@ -219,7 +219,7 @@ void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
 	g_nRoundState = EVZRoundState_End;
 	SendEntityInput("func_respawnroom", "DisableAndEndTouch");
 
-	BonusRound_Reset();
+	BonusRound_Expire();
 	SetGlow();
 }
 
@@ -364,7 +364,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 		else if (g_nRoundState == EVZRoundState_Setup)
 			SetEntityMoveType(iClient, MOVETYPE_NONE);
 	}
-	else if (IsSurvivor(iClient) && !IsAllowedToBuildSentry(iClient))
+	else if (IsSurvivor(iClient) && !IsAllowedToBuild(iClient, TFObject_Sentry))
 	{
 		int iSentry = -1;
 		while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) != -1)
@@ -384,7 +384,13 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	if (g_ConvarInfo.LookupBool("evz_holiday_things") && TF2_IsHolidayActive(TFHoliday_Christmas))
 		TF2_CreateAndEquipWeapon(iClient, SANTA_HAT);
 
-	BonusRound_PlayerSpawn(iClient);
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnPlayerSpawn"))
+	{
+		Call_PushCell(iClient);
+		Call_Finish();
+	}
+
 	SetGlow();
 }
 
@@ -412,9 +418,8 @@ void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 				WeaponConfig weapon;
 				if (g_WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
 				{
-					g_Player[iAttacker].iKillComboCount++;
-					if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
-						CPrintToChat(iAttacker, "%t", "Chat_KillComboCritCharged");
+					if (++g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+						CPrintToChat(iAttacker, "%t", "#Chat_KillComboCritCharged");
 				}
 			}
 		}

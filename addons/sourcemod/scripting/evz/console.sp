@@ -45,7 +45,7 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 			// ...as survivor, don't let them.
 			if (nTeam == TFTeam_Survivor)
 			{
-				CPrintToChat(iClient, "%t", "Chat_CantSwitchSetup");
+				CPrintToChat(iClient, "%t", "#Chat_CantSwitchSetup");
 				return Plugin_Handled;
 			}
 
@@ -57,7 +57,7 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 					if (nTeam == TFTeam_Unassigned) // If they're unassigned, let them spectate for now
 						TF2_ChangeClientTeam(iClient, TFTeam_Spectator);
 
-					CPrintToChat(iClient, "%t", "Chat_WillJoinZombieSetup");
+					CPrintToChat(iClient, "%t", "#Chat_WillJoinZombieSetup");
 					g_Player[iClient].bWaitingForTeamSwitch = true;
 				}
 
@@ -68,7 +68,7 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		{
 			if (nTeam <= TFTeam_Spectator && g_Player[iClient].bWaitingForTeamSwitch)
 			{
-				CPrintToChat(iClient, "%t", "Chat_CancelSetupEnd");
+				CPrintToChat(iClient, "%t", "#Chat_CancelSetupEnd");
 				g_Player[iClient].bWaitingForTeamSwitch = false;
 			}
 
@@ -91,7 +91,7 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 					if (nTeam == TFTeam_Unassigned) // If they're unassigned, let them spectate for now
 						TF2_ChangeClientTeam(iClient, TFTeam_Spectator);
 
-					CPrintToChat(iClient, "%t", "Chat_CantJoinDuringSetup");
+					CPrintToChat(iClient, "%t", "#Chat_CantJoinDuringSetup");
 					g_Player[iClient].bWaitingForTeamSwitch = true;
 				}
 			}
@@ -147,28 +147,6 @@ Action Console_Build(int iClient, const char[] sCommand, int iArgc)
 	if (iArgc < 1)
 		return Plugin_Handled;
 
-	char sObjectType[32];
-	GetCmdArg(1, sObjectType, sizeof(sObjectType));
-
-	TFObjectType nObjectType = view_as<TFObjectType>(StringToInt(sObjectType));
-	switch (nObjectType)
-	{
-		case TFObject_Sentry:
-		{
-			if (!IsAllowedToBuildSentry(iClient))
-				return Plugin_Handled;
-		}
-		case TFObject_Dispenser:
-		{
-			if (g_nBonusRound == BonusRound_NoDispensers)
-				return Plugin_Handled;
-		}
-		case TFObject_Teleporter:
-		{
-			if (g_nBonusRound == BonusRound_DoubleDilemma)
-				return Plugin_Handled;
-		}
-	}
-
-	return Plugin_Continue;
+	TFObjectType nObjectType = view_as<TFObjectType>(GetCmdArgInt(1));
+	return IsAllowedToBuild(iClient, nObjectType) ? Plugin_Continue : Plugin_Handled;
 }

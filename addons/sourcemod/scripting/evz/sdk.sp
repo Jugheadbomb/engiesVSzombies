@@ -1,7 +1,6 @@
 static Handle g_hSDKEquipWearable;
 static Handle g_hSDKSetSpeed;
 static DynamicHook g_DHookShouldTransmit;
-static DynamicHook g_DHookCanBeUpgraded;
 static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
 
 void SDK_Init()
@@ -26,7 +25,6 @@ void SDK_Init()
 		LogError("Failed to create call: CTFPlayer::TeamFortress_SetSpeed");
 
 	g_DHookShouldTransmit = DynamicHook.FromConf(hEVZ, "CBaseEntity::ShouldTransmit");
-	g_DHookCanBeUpgraded = DynamicHook.FromConf(hEVZ, "CBaseObject::CanBeUpgraded");
 	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Pre, DHook_DoSwingTraceInternalPre);
 	DynamicDetour.FromConf(hEVZ, "CTFWeaponBaseMelee::DoSwingTraceInternal").Enable(Hook_Post, DHook_DoSwingTraceInternalPost);
 	DynamicDetour.FromConf(hEVZ, "CTFAmmoPack::MakeHolidayPack").Enable(Hook_Pre, DHook_MakeHolidayPackPre);
@@ -40,28 +38,11 @@ void SDK_OnClientConnect(int iClient)
 	g_DHookShouldTransmit.HookEntity(Hook_Post, iClient, DHook_ShouldTransmitPost);
 }
 
-void SDK_OnEntityCreated(int iEntity, const char[] sClassname)
-{
-	if (StrContains(sClassname, "obj_", false) == 0)
-		g_DHookCanBeUpgraded.HookEntity(Hook_Post, iEntity, DHook_CanBeUpgradedPost);
-}
-
 MRESReturn DHook_ShouldTransmitPost(int iClient, DHookReturn ret, DHookParam params)
 {
 	if (GetEntProp(iClient, Prop_Send, "m_bGlowEnabled"))
 	{
 		ret.Value = FL_EDICT_ALWAYS;
-		return MRES_Supercede;
-	}
-
-	return MRES_Ignored;
-}
-
-MRESReturn DHook_CanBeUpgradedPost(int iBuilding, DHookReturn ret, DHookParam params)
-{
-	if (g_nBonusRound == BonusRound_NoUpgrades)
-	{
-		ret.Value = false;
 		return MRES_Supercede;
 	}
 

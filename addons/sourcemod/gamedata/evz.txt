@@ -9,11 +9,6 @@
 				"linux"			"21"
 				"windows"		"20"
 			}
-			"CBaseObject::CanBeUpgraded"
-			{
-				"linux"			"383"
-				"windows"		"381"
-			}
 		}
 		"Signatures"
 		{
@@ -49,20 +44,6 @@
 					"pTransmitInfo"
 					{
 						"type"	"objectptr"
-					}
-				}
-			}
-			"CBaseObject::CanBeUpgraded"
-			{
-				"offset"		"CBaseObject::CanBeUpgraded"
-				"hooktype"		"entity"
-				"return"		"bool"
-				"this"			"entity"
-				"arguments"
-				{
-					"pPlayer"
-					{
-						"type"	"cbaseentity"
 					}
 				}
 			}

@@ -3,14 +3,14 @@ static int g_iMenuSelection[TF_MAXPLAYERS];
 void Menu_DisplayMain(int iClient)
 {
 	Menu hMenu = new Menu(Menu_SelectMain);
-	hMenu.SetTitle("%T", "Menu_MainTitle", iClient, PLUGIN_VERSION, PLUGIN_VERSION_REVISION);
+	hMenu.SetTitle("%T", "#Menu_MainTitle", iClient, PLUGIN_VERSION, PLUGIN_VERSION_REVISION);
 
-	Menu_AddItemTranslation(hMenu, "overview", "Menu_MainOverview", iClient);
-	Menu_AddItemTranslation(hMenu, "team_survivor", "Menu_MainTeamSurvivor", iClient);
-	Menu_AddItemTranslation(hMenu, "team_zombie", "Menu_MainTeamZombie", iClient);
-	Menu_AddItemTranslation(hMenu, "balances", "Menu_MainBalances", iClient);
+	Menu_AddItemTranslation(hMenu, "overview", "#Menu_MainOverview", iClient);
+	Menu_AddItemTranslation(hMenu, "team_survivor", "#Menu_MainTeamSurvivor", iClient);
+	Menu_AddItemTranslation(hMenu, "team_zombie", "#Menu_MainTeamZombie", iClient);
+	Menu_AddItemTranslation(hMenu, "balances", "#Menu_MainBalances", iClient);
 	if (g_ConvarInfo.LookupBool("evz_bonus_rounds_enable"))
-		Menu_AddItemTranslation(hMenu, "bonusrounds", "Menu_MainBonusRounds", iClient);
+		Menu_AddItemTranslation(hMenu, "bonusrounds", "#Menu_MainBonusRounds", iClient);
 
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
@@ -25,11 +25,11 @@ int Menu_SelectMain(Menu hMenu, MenuAction action, int iClient, int iSlot)
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
 			if (StrEqual(sInfo, "overview"))
-				Menu_DisplayInfo(iClient, "Menu_MainOverview", "Menu_Overview");
+				Menu_DisplayInfo(iClient, "#Menu_MainOverview", "#Menu_Overview");
 			else if (StrEqual(sInfo, "team_survivor"))
-				Menu_DisplayInfo(iClient, "Menu_MainTeamSurvivor", "Menu_TeamSurvivor");
+				Menu_DisplayInfo(iClient, "#Menu_MainTeamSurvivor", "#Menu_TeamSurvivor");
 			else if (StrEqual(sInfo, "team_zombie"))
-				Menu_DisplayInfo(iClient, "Menu_MainTeamZombie", "Menu_TeamZombie");
+				Menu_DisplayInfo(iClient, "#Menu_MainTeamZombie", "#Menu_TeamZombie");
 			else if (StrEqual(sInfo, "balances"))
 				Menu_DisplayBalances(iClient);
 			else if (StrEqual(sInfo, "bonusrounds"))
@@ -53,7 +53,7 @@ void Menu_DisplayInfo(int iClient, const char[] sTitle, const char[] sInfo)
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
 	hMenu.SetTitle(sBuffer);
-	Menu_AddItemTranslation(hMenu, "back", "Menu_MainBack", iClient);
+	Menu_AddItemTranslation(hMenu, "back", "#Menu_MainBack", iClient);
 
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
@@ -72,7 +72,7 @@ int Menu_SelectInfo(Menu hMenu, MenuAction action, int iClient, int iSlot)
 void Menu_DisplayBalances(int iClient, int iSelection = -1)
 {
 	Menu hMenu = new Menu(Menu_SelectBalances);
-	hMenu.SetTitle("%T", "Menu_MainBalances", iClient);
+	hMenu.SetTitle("%T", "#Menu_MainBalances", iClient);
 
 	char sBuffer[16];
 	for (int i = 0; i < g_WeaponList.Length; i++)
@@ -135,7 +135,7 @@ void Menu_DisplayWeapon(int iClient, WeaponConfig weapon)
 	ReplaceString(sBuffer, sizeof(sBuffer), "%", "%%");
 
 	hMenu.SetTitle(sBuffer);
-	Menu_AddItemTranslation(hMenu, "back", "Menu_MainBack", iClient);
+	Menu_AddItemTranslation(hMenu, "back", "#Menu_MainBack", iClient);
 
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }
@@ -154,26 +154,17 @@ int Menu_SelectWeapon(Menu hMenu, MenuAction action, int iClient, int iSlot)
 void Menu_DisplayBonusRounds(int iClient, int iSelection = -1)
 {
 	Menu hMenu = new Menu(Menu_SelectBonusRounds);
-	hMenu.SetTitle("%T", "Menu_MainBonusRounds", iClient);
-
-	char sCurrent[128];
-	Format(sCurrent, sizeof(sCurrent), "%T", "Menu_CurrentRound", iClient);
-
-	RoundConfig round;
-	if (g_RoundList.GetCurrent(round))
-		Format(sCurrent, sizeof(sCurrent), "%s: %T", sCurrent, round.sName, iClient);
-	else
-		Format(sCurrent, sizeof(sCurrent), "%s: %T", sCurrent, "Menu_None", iClient);
-
-	hMenu.AddItem("current", sCurrent, ITEMDRAW_DISABLED);
+	hMenu.SetTitle("%T", "#Menu_MainBonusRounds", iClient);
 
 	char sBuffer[16];
-	for (int i = 0; i < g_RoundList.Length; i++)
+	for (int i = 0; i < g_aRounds.Length; i++)
 	{
-		g_RoundList.GetArray(i, round, sizeof(round));
-
-		Format(sBuffer, sizeof(sBuffer), "%i", i);
-		Menu_AddItemTranslation(hMenu, sBuffer, round.sName, iClient);
+		BonusRound round;
+		if (g_aRounds.GetArray(i, round) && round.bEnabled)
+		{
+			Format(sBuffer, sizeof(sBuffer), "%i", i);
+			Menu_AddItemTranslation(hMenu, sBuffer, round.sName, iClient, round.sDesc[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		}
 	}
 
 	hMenu.ExitBackButton = true;
@@ -193,9 +184,9 @@ int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot
 			char sInfo[16];
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
-			RoundConfig round;
-			g_RoundList.GetArray(StringToInt(sInfo), round, sizeof(round));
-			Menu_DisplayRound(iClient, round);
+			BonusRound round;
+			if (g_aRounds.GetArray(StringToInt(sInfo), round))
+				Menu_DisplayRound(iClient, round);
 
 			g_iMenuSelection[iClient] = GetMenuSelectionPosition();
 		}
@@ -210,7 +201,7 @@ int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot
 	return 0;
 }
 
-void Menu_DisplayRound(int iClient, RoundConfig round)
+void Menu_DisplayRound(int iClient, BonusRound round)
 {
 	char sBuffer[512];
 	Menu hMenu = new Menu(Menu_SelectRound);
@@ -222,7 +213,7 @@ void Menu_DisplayRound(int iClient, RoundConfig round)
 	StrCat(sBuffer, sizeof(sBuffer), "\n-------------------------------------------");
 
 	hMenu.SetTitle(sBuffer);
-	Menu_AddItemTranslation(hMenu, "back", "Menu_MainBack", iClient);
+	Menu_AddItemTranslation(hMenu, "back", "#Menu_MainBack", iClient);
 
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
 }

@@ -3,29 +3,6 @@
 #endif
 #define _engiesvszombies_included
 
-enum BonusRound
-{
-	BonusRound_None,
-
-	BonusRound_LowGravity,
-	BonusRound_CuriousFeeling,
-	BonusRound_NoDispensers,
-	BonusRound_EarlyOutbreak,
-	BonusRound_MurderousJoy,
-	BonusRound_KevlarVests,
-	BonusRound_DoubleDilemma,
-	BonusRound_HighGravity,
-	BonusRound_MeleeBattle,
-	BonusRound_RandomFits,
-	BonusRound_HotPotato,
-	BonusRound_NoUpgrades,
-	BonusRound_TeamSwap,
-	BonusRound_CompetitiveRules,
-	BonusRound_DeafEars,
-
-	BonusRound_Count
-};
-
 /**
  * Gets current team survivor is
  * 
@@ -39,13 +16,6 @@ native TFTeam EVZ_GetSurvivorTeam();
  * @return	TFTeam of zombie team
  */
 native TFTeam EVZ_GetZombieTeam();
-
-/**
- * Gets current bonus round
- * 
- * @return	BonusRound value, or BonusRound_None if no bonus round active
- */
-native BonusRound EVZ_GetBonusRound();
 
 /**
  * Forward called when zombies are being released
@@ -84,5 +54,4 @@ public void __pl_engiesvszombies_SetNTVOptional()
 {
 	MarkNativeAsOptional("EVZ_GetSurvivorTeam");
 	MarkNativeAsOptional("EVZ_GetZombieTeam");
-	MarkNativeAsOptional("EVZ_GetBonusRound");
 }

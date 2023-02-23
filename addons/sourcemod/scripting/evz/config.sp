@@ -1,4 +1,4 @@
-#define CONFIG_PATH "configs/evz.cfg"
+#define CONFIG_PATH "configs/evz/evz.cfg"
 
 enum FindValue
 {
@@ -29,7 +29,7 @@ enum struct WeaponConfig
 
 		int iIndex = -1;
 		if (StringToIntEx(sBuffer, iIndex) == 0)
-			strcopy(this.sClassname, sizeof(WeaponConfig::sClassname), sBuffer);
+			strcopy(this.sClassname, sizeof(this.sClassname), sBuffer);
 		else
 			this.iIndex = iIndex;
 
@@ -42,39 +42,10 @@ enum struct WeaponConfig
 		this.bBlockSecondary = !!kv.GetNum("block_m2");
 		this.bSentry = !!kv.GetNum("sentry");
 
-		kv.GetString("name", this.sName, sizeof(WeaponConfig::sName));
-		kv.GetString("desc", this.sDesc, sizeof(WeaponConfig::sDesc));
-		kv.GetString("attrib", this.sAttrib, sizeof(WeaponConfig::sAttrib));
-		kv.GetString("attrib_onswitch", this.sAttribSwitch, sizeof(WeaponConfig::sAttribSwitch));
-		return (this.sName[0] && this.sDesc[0]);
-	}
-}
-
-enum struct RoundConfig
-{
-	BonusRound id;
-
-	char sName[64];
-	char sDesc[64];
-
-	bool ReadFromKv(KeyValues kv)
-	{
-		char sBuffer[64];
-		kv.GetSectionName(sBuffer, sizeof(sBuffer));
-
-		if (!kv.GetNum("enable", 1))
-			return false;
-
-		int id = -1;
-		if (StringToIntEx(sBuffer, id) == 0)
-			return false;
-
-		this.id = view_as<BonusRound>(id);
-		if (this.id <= BonusRound_None || this.id >= BonusRound_Count)
-			return false;
-
-		kv.GetString("name", this.sName, sizeof(RoundConfig::sName));
-		kv.GetString("desc", this.sDesc, sizeof(RoundConfig::sDesc));
+		kv.GetString("name", this.sName, sizeof(this.sName));
+		kv.GetString("desc", this.sDesc, sizeof(this.sDesc));
+		kv.GetString("attrib", this.sAttrib, sizeof(this.sAttrib));
+		kv.GetString("attrib_onswitch", this.sAttribSwitch, sizeof(this.sAttribSwitch));
 		return (this.sName[0] && this.sDesc[0]);
 	}
 }
@@ -144,53 +115,6 @@ methodmap WeaponList < ArrayList
 			if (StrEqual(weapon.sClassname, sClassname, false))
 				return true;
 		}
-
-		return false;
-	}
-}
-
-methodmap RoundList < ArrayList
-{
-	public RoundList()
-	{
-		return view_as<RoundList>(new ArrayList(sizeof(RoundConfig)));
-	}
-
-	public void LoadSection(KeyValues kv)
-	{
-		if (kv.JumpToKey("bonusrounds", false))
-		{
-			if (kv.GotoFirstSubKey())
-			{
-				do
-				{
-					RoundConfig round;
-					if (round.ReadFromKv(kv))
-						this.PushArray(round, sizeof(round));
-				}
-				while (kv.GotoNextKey());
-				kv.GoBack();
-			}
-			kv.GoBack();
-		}
-	}
-
-	public bool GetRandom(RoundConfig round)
-	{
-		if (this.Length > 0)
-			return !!this.GetArray(GetURandomInt() % this.Length, round, sizeof(round));
-
-		return false;
-	}
-
-	public bool GetCurrent(RoundConfig round)
-	{
-		if (g_nBonusRound == BonusRound_None)
-			return false;
-
-		int index = this.FindValue(g_nBonusRound, RoundConfig::id);
-		if (index != -1)
-			return !!this.GetArray(index, round, sizeof(round));
 
 		return false;
 	}
@@ -284,27 +208,23 @@ methodmap ConvarInfo < StringMap
 }
 
 WeaponList g_WeaponList;
-RoundList g_RoundList;
 ConvarInfo g_ConvarInfo;
 
 void Config_Init()
 {
 	g_WeaponList = new WeaponList();
-	g_RoundList = new RoundList();
 	g_ConvarInfo = new ConvarInfo();
 }
 
 void Config_Refresh()
 {
 	g_WeaponList.Clear();
-	g_RoundList.Clear();
 
 	KeyValues kv = Config_LoadFile(CONFIG_PATH);
 	if (!kv)
 		return;
 
 	g_WeaponList.LoadSection(kv);
-	g_RoundList.LoadSection(kv);
 	g_ConvarInfo.LoadSection(kv);
 	delete kv;
 }
@@ -319,7 +239,7 @@ KeyValues Config_LoadFile(const char[] configFile)
 		return null;
 	}
 
-	KeyValues kv = new KeyValues("Config");
+	KeyValues kv = new KeyValues("config");
 	kv.SetEscapeSequences(true);
 
 	if (!kv.ImportFromFile(configPath))

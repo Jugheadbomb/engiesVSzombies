@@ -18,7 +18,6 @@
 
 #define TF_MAXPLAYERS 34
 
-#define TF_VISION_FILTER_PYRO (1 << 0)
 #define TF_VISION_FILTER_HALLOWEEN (1 << 1)
 #define ATTRIB_VISION 406
 
@@ -42,13 +41,12 @@ ConVar spec_freeze_time;
 ConVar mp_teams_unbalance_limit;
 ConVar mp_waitingforplayers_time;
 ConVar tf_boost_drain_time;
-ConVar tf_use_fixed_weaponspreads;
 
 Cookie g_cForceZombieStart;
 bool g_bLastSurvivor;
 
 EVZRoundState g_nRoundState;
-BonusRound g_nBonusRound;
+ArrayList g_aRounds;
 
 enum struct Player
 {
@@ -80,14 +78,25 @@ enum EVZRoundState
 	EVZRoundState_End
 };
 
-#include "evz/config.sp"
 #include "evz/bonusround.sp"
+#include "evz/config.sp"
 #include "evz/console.sp"
 #include "evz/event.sp"
 #include "evz/include.sp"
 #include "evz/menu.sp"
 #include "evz/sdk.sp"
 #include "evz/stocks.sp"
+
+// Bonus rounds
+#include "evz/rounds/kevlarvests.sp"
+#include "evz/rounds/moveordie.sp"
+#include "evz/rounds/nodispensers.sp"
+#include "evz/rounds/nosetup.sp"
+#include "evz/rounds/setattribute.sp"
+#include "evz/rounds/setconvar.sp"
+#include "evz/rounds/setcustommodel.sp"
+#include "evz/rounds/silentenemies.sp"
+#include "evz/rounds/teamswap.sp"
 
 public Plugin myinfo =
 {
@@ -108,6 +117,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	g_aRounds = new ArrayList(sizeof(BonusRound));
+
 	mp_autoteambalance = FindConVar("mp_autoteambalance");
 	mp_scrambleteams_auto = FindConVar("mp_scrambleteams_auto");
 	mp_disable_respawn_times = FindConVar("mp_disable_respawn_times");
@@ -117,7 +128,6 @@ public void OnPluginStart()
 	mp_teams_unbalance_limit = FindConVar("mp_teams_unbalance_limit");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	tf_boost_drain_time = FindConVar("tf_boost_drain_time");
-	tf_use_fixed_weaponspreads = FindConVar("tf_use_fixed_weaponspreads");
 
 	g_cForceZombieStart = new Cookie("evz_forcezombiestart", "TrollFace", CookieAccess_Protected);
 
@@ -127,6 +137,7 @@ public void OnPluginStart()
 	HookEntityOutput("func_respawnroom", "OnEndTouch", RespawnRoom_OnEndTouch);
 	HookEntityOutput("func_door", "OnFullyOpen", Door_OnFullyOpen);
 
+	BonusRound_Init();
 	Config_Init();
 	Console_Init();
 	Event_Init();
@@ -178,8 +189,6 @@ public void OnConfigsExecuted()
 	else
 		g_nRoundState = EVZRoundState_Waiting;
 
-	BonusRound_Reset();
-
 	CreateTimer(70.0, Timer_WelcomeMessage, _, TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(240.0, Timer_WelcomeMessage, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	CreateTimer(1.0, Timer_Main, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
@@ -191,6 +200,7 @@ public void OnConfigsExecuted()
 public void OnMapEnd()
 {
 	g_nRoundState = EVZRoundState_End;
+	BonusRound_Expire();
 }
 
 public void OnPluginEnd()
@@ -198,8 +208,12 @@ public void OnPluginEnd()
 	if (GameRules_GetRoundState() >= RoundState_Preround)
 		TF2_EndRound(TFTeam_Unassigned);
 
-	BonusRound_Reset();
+	BonusRound_Expire();
 	Plugin_Cvars(false);
+
+	for (int iClient = 1; iClient <= MaxClients; iClient++)
+		if (IsClientInGame(iClient))
+			RemoveVision(iClient, TF_VISION_FILTER_HALLOWEEN);
 }
 
 public void OnClientPutInServer(int iClient)
@@ -210,6 +224,13 @@ public void OnClientPutInServer(int iClient)
 	SDKHook(iClient, SDKHook_OnTakeDamageAlive, Client_OnTakeDamageAlive);
 	SDKHook(iClient, SDKHook_WeaponSwitchPost, Client_WeaponSwitchPost);
 	SDK_OnClientConnect(iClient);
+
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnClientPutInServer"))
+	{
+		Call_PushCell(iClient);
+		Call_Finish();
+	}
 }
 
 public void OnClientCookiesCached(int iClient)
@@ -234,7 +255,23 @@ public void OnEntityCreated(int iEntity, const char[] sClassname)
 	else if (StrEqual(sClassname, "team_control_point"))
 		SDKHook(iEntity, SDKHook_Spawn, Point_Spawn);
 
-	SDK_OnEntityCreated(iEntity, sClassname);
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnEntityCreated"))
+	{
+		Call_PushCell(iEntity);
+		Call_PushString(sClassname);
+		Call_Finish();
+	}
+}
+
+public void OnEntityDestroyed(int iEntity)
+{
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnEntityDestroyed"))
+	{
+		Call_PushCell(iEntity);
+		Call_Finish();
+	}
 }
 
 public void OnGameFrame()
@@ -252,6 +289,10 @@ public void OnGameFrame()
 		if (IsSurvivor(iClient) && iSurvivors == 1 && iAlivePlayers >= 4)
 			TF2_AddCondition(iClient, TFCond_Buffed, 0.05);
 	}
+
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("Update"))
+		Call_Finish();
 }
 
 public void TF2_OnWaitingForPlayersStart()
@@ -273,6 +314,28 @@ public Action TF2_OnIsHolidayActive(TFHoliday nHoliday, bool &bResult)
 	}
 
 	return Plugin_Continue;
+}
+
+public void TF2_OnConditionAdded(int iClient, TFCond cond)
+{
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnConditionAdded"))
+	{
+		Call_PushCell(iClient);
+		Call_PushCell(cond);
+		Call_Finish();
+	}
+}
+
+public void TF2_OnConditionRemoved(int iClient, TFCond cond)
+{
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnConditionRemoved"))
+	{
+		Call_PushCell(iClient);
+		Call_PushCell(cond);
+		Call_Finish();
+	}
 }
 
 public Action TF2_OnPlayerTeleport(int iClient, int iTeleporter, bool &bResult)
@@ -320,10 +383,10 @@ public Action TF2Items_OnGiveNamedItem(int iClient, char[] sClassname, int iInde
 public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float vecVelocity[3], float vecAngles[3], int &iWeapon, int &iSubtype, int &iCmdnum, int &iTickcount, int &iSeed, int iMouse[2])
 {
 	static int iJumps[TF_MAXPLAYERS];
-	static float flLastDamageTime[TF_MAXPLAYERS];
+	Action action = Plugin_Continue;
 
 	// Double jump
-	if (IsZombie(iClient) || (g_nBonusRound == BonusRound_DoubleDilemma && IsSurvivor(iClient)))
+	if (IsZombie(iClient))
 	{
 		int iFlags = GetEntityFlags(iClient);
 		int iOldButtons = GetEntProp(iClient, Prop_Data, "m_nOldButtons");
@@ -341,7 +404,6 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 				vecVel[2] = g_ConvarInfo.LookupFloat("evz_zombie_doublejump_height");
 
 			TeleportEntity(iClient, NULL_VECTOR, NULL_VECTOR, vecVel);
-			TE_Particle(iClient, "doublejump_puff", true);
 		}
 		else if (iFlags & FL_ONGROUND)
 			iJumps[iClient] = 0;
@@ -355,38 +417,48 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 			SetEntPropFloat(iActivewep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 1.0);
 	}
 
-	if (g_nBonusRound == BonusRound_HotPotato)
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnPlayerRunCmd"))
 	{
-		float vecVel[3];
-		GetEntPropVector(iClient, Prop_Data, "m_vecAbsVelocity", vecVel);
-		if (GetVectorLength(vecVel) == 0.0 && flLastDamageTime[iClient] < GetGameTime())
+		Call_PushCell(iClient);
+		Call_PushCellRef(iButtons);
+		Call_PushCellRef(iWeapon);
+
+		Action nResult;
+		if (Call_Finish(nResult) == SP_ERROR_NONE)
 		{
-			SDKHooks_TakeDamage(iClient, iClient, iClient, 3.0);
-			flLastDamageTime[iClient] = GetGameTime() + 0.25;
+			if (nResult > action)
+				action = nResult;
 		}
 	}
 
 	return Plugin_Continue;
 }
 
-Action SoundHook(int iClients[MAXPLAYERS], int &iNumClients, char sSound[PLATFORM_MAX_PATH], int &iClient, int &iChannel, float &flVolume, int &iLevel, int &iPitch, int &iFlags, char sSoundEntry[PLATFORM_MAX_PATH], int &iSeed)
+Action SoundHook(int iClients[MAXPLAYERS], int &iNumClients, char sSound[PLATFORM_MAX_PATH], int &iEntity, int &iChannel, float &flVolume, int &iLevel, int &iPitch, int &iFlags, char sSoundEntry[PLATFORM_MAX_PATH], int &iSeed)
 {
-	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
-		return Plugin_Continue;
-
 	Action action = Plugin_Continue;
-	if (g_nBonusRound == BonusRound_DeafEars)
-	{
-		for (int i = iNumClients - 1; i >= 0; i--)
-		{
-			if (TF2_GetClientTeam(iClients[i]) != TF2_GetClientTeam(iClient))
-			{
-				for (int j = i; j < iNumClients; j++)
-					iClients[j] = iClients[j + 1];
 
-				iNumClients--;
-				action = Plugin_Changed;
-			}
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnSoundPlayed"))
+	{
+		Call_PushArrayEx(iClients, sizeof(iClients), SM_PARAM_COPYBACK);
+		Call_PushCellRef(iNumClients);
+		Call_PushStringEx(sSound, sizeof(sSound), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(iEntity);
+		Call_PushCellRef(iChannel);
+		Call_PushCellRef(flVolume);
+		Call_PushCellRef(iLevel);
+		Call_PushCellRef(iPitch);
+		Call_PushCellRef(iFlags);
+		Call_PushStringEx(sSoundEntry, sizeof(sSoundEntry), SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+		Call_PushCellRef(iSeed);
+
+		Action nResult;
+		if (Call_Finish(nResult) == SP_ERROR_NONE)
+		{
+			if (nResult > action)
+				action = nResult;
 		}
 	}
 
@@ -403,7 +475,7 @@ void RespawnRoom_OnStartTouch(const char[] sOutput, int iCaller, int iActivator,
 		if (IsZombie(iActivator))
 			TF2_AddCondition(iActivator, TFCond_UberchargedHidden);
 		else if (IsSurvivor(iActivator))
-			PrintCenterText(iActivator, "%t", "Hud_ZombieSpawnArea");
+			PrintCenterText(iActivator, "%t", "#Hud_ZombieSpawnArea");
 	}
 }
 
@@ -460,10 +532,10 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 				SetEntityHealth(iClient, 350);
 		}
 		else if (IsSurvivor(iClient))
-			ShowHudText(iClient, CHANNEL_INFO, "%t", "Hud_ZombiesReleased");
+			ShowHudText(iClient, CHANNEL_INFO, "%t", "#Hud_ZombiesReleased");
 
 		if (bImbalanced)
-			CPrintToChat(iClient, "%t", "Chat_ImbalancedRound", (IsZombie(iClient)) ? "{green}" : "{red}");
+			CPrintToChat(iClient, "%t", "#Chat_ImbalancedRound", (IsZombie(iClient)) ? "{green}" : "{red}");
 	}
 
 	// Check for valid sentries
@@ -471,12 +543,16 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 	while ((iSentry = FindEntityByClassname(iSentry, "obj_sentrygun")) != -1)
 	{
 		int iBuilder = GetEntPropEnt(iSentry, Prop_Send, "m_hBuilder");
-		if (0 < iBuilder <= MaxClients && IsClientInGame(iBuilder) && IsAllowedToBuildSentry(iBuilder))
+		if (0 < iBuilder <= MaxClients && IsClientInGame(iBuilder) && IsAllowedToBuild(iBuilder, TFObject_Sentry))
 			continue;
 
 		SetVariantInt(GetEntProp(iSentry, Prop_Send, "m_iHealth"));
 		AcceptEntityInput(iSentry, "RemoveHealth");
 	}
+
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnSetupFinished"))
+		Call_Finish();
 
 	Forward_OnZombiesRelease();
 	SetGlow();
@@ -490,7 +566,7 @@ void RoundTimer_OnFinished(const char[] sOutput, int iCaller, int iActivator, fl
 
 Action Timer_WelcomeMessage(Handle hTimer)
 {	
-	CPrintToChatAll("%t", "Chat_WelcomeMessage");
+	CPrintToChatAll("%t", "#Chat_WelcomeMessage");
 	return Plugin_Continue;
 }
 
@@ -515,41 +591,6 @@ Action Timer_Main(Handle hTimer)
 {
 	if (!IsActiveRound())
 		return Plugin_Continue;
-
-	int iTimer = FindEntityByClassname(-1, "team_round_timer");
-	if (iTimer > MaxClients && g_nRoundState == EVZRoundState_Active)
-	{
-		float flTimeRemaining = GetEntPropFloat(iTimer, Prop_Send, "m_flTimerEndTime") - GetGameTime();
-		if (RoundToZero(flTimeRemaining) <= g_ConvarInfo.LookupInt("evz_zombie_boost_time"))
-		{
-			g_nRoundState = EVZRoundState_Boost;
-
-			for (int iClient = 1; iClient <= MaxClients; iClient++)
-			{
-				if (!IsClientInGame(iClient) || !IsPlayerAlive(iClient))
-					continue;
-
-				if (IsZombie(iClient))
-					BoostZombie(iClient);
-			}
-
-			Forward_OnZombiesBoost();
-		}
-	}
-
-	CheckWinCondition();
-	SetTeamRespawnTime(TFTeam_Zombie, g_ConvarInfo.LookupFloat("evz_zombie_respawn_time"));
-
-	SetHudTextParams(-1.0, 0.06, 1.1, 0, 0, 255, 200);
-	for (int iClient = 1; iClient <= MaxClients; iClient++)
-	{
-		if (!IsClientInGame(iClient) || TF2_GetClientTeam(iClient) <= TFTeam_Spectator)
-			continue;
-
-		// Zombie boost hud message
-		if (g_nRoundState == EVZRoundState_Boost && !(GetClientButtons(iClient) & IN_SCORE))
-			ShowHudText(iClient, CHANNEL_INFO, "%t", "Hud_ZombiesBoosted");
-	}
 
 	// Handle sentry rules
 	// - Mini and Norm sentry starts with 60 ammo and decays to 0, then self destructs
@@ -584,6 +625,46 @@ Action Timer_Main(Handle hTimer)
 			SetVariantInt(GetEntProp(iSentry, Prop_Send, "m_iMaxHealth"));
 			AcceptEntityInput(iSentry, "RemoveHealth");
 		}
+	}
+
+	int iTimer = FindEntityByClassname(-1, "team_round_timer");
+	if (iTimer > MaxClients && g_nRoundState == EVZRoundState_Active)
+	{
+		float flTimeRemaining = GetEntPropFloat(iTimer, Prop_Send, "m_flTimerEndTime") - GetGameTime();
+		if (RoundToZero(flTimeRemaining) <= g_ConvarInfo.LookupInt("evz_zombie_boost_time"))
+		{
+			// Toggle zombie boost
+			g_nRoundState = EVZRoundState_Boost;
+
+			for (int iClient = 1; iClient <= MaxClients; iClient++)
+			{
+				if (!IsClientInGame(iClient) || !IsPlayerAlive(iClient))
+					continue;
+
+				if (IsZombie(iClient))
+					BoostZombie(iClient);
+			}
+
+			Forward_OnZombiesBoost();
+		}
+	}
+
+	CheckWinCondition();
+	SetTeamRespawnTime(TFTeam_Zombie, g_ConvarInfo.LookupFloat("evz_zombie_respawn_time"));
+
+	// Zombie boost hud message
+	if (g_nRoundState == EVZRoundState_Boost)
+	{
+		SetHudTextParams(-1.0, 0.06, 1.1, 0, 0, 255, 200);
+		ShowHudTextAll(CHANNEL_INFO, "%t", "#Hud_ZombiesBoosted");
+	}
+
+	// Bonusround hud message
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.bShowInHUD)
+	{
+		SetHudTextParams(-1.0, 0.09, 1.1, 0, 255, 255, 200);
+		ShowHudTextAll(CHANNEL_BONUSROUND, "%t: %t", "#Hud_BonusRound", round.sName);
 	}
 
 	return Plugin_Continue;
@@ -643,6 +724,8 @@ Action Point_Spawn(int iEntity)
 
 Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, float &flDamage, int &iDamageType, int &iWeapon, float vecForce[3], float vecForcePos[3], int iDamageCustom)
 {
+	Action action = Plugin_Continue;
+
 	if (IsZombie(iVictim))
 	{
 		// Disable physics force from sentry damage
@@ -653,46 +736,47 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 			if (StrEqual(sInflictor, "obj_sentrygun", false))
 			{
 				iDamageType |= DMG_PREVENT_PHYSICS_FORCE;
-				return Plugin_Changed;
+				action = Plugin_Changed;
 			}
 		}
 
 		if (iWeapon > MaxClients && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker) && IsSurvivor(iAttacker))
 		{
 			WeaponConfig weapon;
-			if (!g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) || !weapon.iKillComboCrit)
-				return Plugin_Continue;
-
-			if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
 			{
-				iDamageType |= DMG_CRIT;
-				flDamage *= 3.0;
+				if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+				{
+					iDamageType |= DMG_CRIT;
+					flDamage *= 3.0;
 
-				g_Player[iAttacker].iKillComboCount = -1; // Set to -1, player_death hook will increment this by one, so it resets to 0
-				return Plugin_Changed;
+					g_Player[iAttacker].iKillComboCount = -1; // Set to -1, player_death hook will increment this by one, so it resets to 0
+					action = Plugin_Changed;
+				}
 			}
 		}
 	}
-	else if (IsSurvivor(iVictim))
+
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnTakeDamage"))
 	{
-		if (g_nBonusRound == BonusRound_KevlarVests && iAttacker != iVictim)
+		Call_PushCell(iVictim);
+		Call_PushCellRef(iAttacker);
+		Call_PushCellRef(iInflictor);
+		Call_PushFloatRef(flDamage);
+		Call_PushCellRef(iDamageType);
+		Call_PushCellRef(iWeapon);
+		Call_PushCellRef(iDamageCustom);
+
+		Action nResult;
+		if (Call_Finish(nResult) == SP_ERROR_NONE)
 		{
-			if (!g_bUsedVest[iVictim] && flDamage >= GetEntProp(iVictim, Prop_Send, "m_iHealth"))
-			{
-				if (TF2_IsPlayerInCondition(iVictim, TFCond_Dazed))
-					TF2_RemoveCondition(iVictim, TFCond_Dazed);
-
-				g_bUsedVest[iVictim] = true;
-				CPrintToChat(iVictim, "%t", "Chat_KevlarUsed");
-				TF2_AddCondition(iVictim, TFCond_SpeedBuffAlly, 1.0);
-
-				flDamage = 0.0;
-				return Plugin_Changed;
-			}
+			if (nResult > action)
+				action = nResult;
 		}
 	}
 
-	return Plugin_Continue;
+	return action;
 }
 
 void Client_WeaponSwitchPost(int iClient, int iWeapon)
@@ -798,23 +882,24 @@ Action Command_StartBonus(int iClient, int iArgc)
 
 	if (g_nRoundState == EVZRoundState_Waiting || g_nRoundState == EVZRoundState_End)
 	{
-		CPrintToChat(iClient, "%t", "Chat_NoActiveRound");
+		CPrintToChat(iClient, "%t", "#Chat_NoActiveRound");
 		return Plugin_Handled;
 	}
 
-	if (iArgc > 0)
+	if (iArgc)
 	{
-		char sRound[8];
-		GetCmdArg(1, sRound, sizeof(sRound));
-		BonusRound nRound = view_as<BonusRound>(StringToInt(sRound));
-		if (BonusRound_None <= nRound < BonusRound_Count)
-		{
-			BonusRound_StartRound(nRound);
+		char id[8];
+		GetCmdArg(1, id, sizeof(id));
 
-			RoundConfig round;
-			if (g_RoundList.GetCurrent(round))
-				BonusRound_DisplayRound(round, true);
+		int index = g_aRounds.FindString(id);
+		if (index != -1)
+		{
+			BonusRound round;
+			if (g_aRounds.GetArray(index, round) && !BonusRound_StartRound(round))
+				CPrintToChat(iClient, "Failed to start round: %t", round.sName);
 		}
+		else
+			CPrintToChat(iClient, "Failed to force unknown round with ID: %s", id);
 	}
 	else
 		BonusRound_StartRoll();
@@ -863,6 +948,21 @@ Action OnGiveNamedItem(int iClient, int iIndex)
 				// Cosmetic is conflicting with santa hat
 				action = Plugin_Handled;
 			}
+		}
+	}
+
+	BonusRound round;
+	if (BonusRound_GetActive(round) && round.StartFunction("OnGiveNamedItem"))
+	{
+		Call_PushCell(iClient);
+		Call_PushCell(iIndex);
+		Call_PushCell(iSlot);
+
+		Action nResult = action;
+		if (Call_Finish(nResult) == SP_ERROR_NONE)
+		{
+			if (nResult != action)
+				action = nResult;
 		}
 	}
 

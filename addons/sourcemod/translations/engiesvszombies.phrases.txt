@@ -365,7 +365,7 @@
 	"#BonusRound_TeamSwap_Desc"
 	{
 		"en"		"Team colors are swapped"
-		"ru"		"Цвет команд меняются местами"
+		"ru"		"Цвета команд меняются местами"
 	}
 	"#BonusRound_SilentEnemies"
 	{

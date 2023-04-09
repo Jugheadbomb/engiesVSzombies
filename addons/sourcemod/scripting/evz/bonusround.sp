@@ -142,11 +142,12 @@ Action BonusRound_RollTimer(Handle hTimer, float flEndTime)
 		{
 			bSelected = true;
 
-			g_aRounds.Sort(Sort_Random, Sort_Integer);
+			ArrayList aClone = g_aRounds.Clone();
+			aClone.Sort(Sort_Random, Sort_Integer);
 
-			for (int i = 0; i < g_aRounds.Length; i++)
+			for (int i = 0; i < aClone.Length; i++)
 			{
-				if (g_aRounds.GetArray(i, round) && round.bEnabled)
+				if (aClone.GetArray(i, round) && round.bEnabled)
 				{
 					if (round.bSetupOnly && IsActiveRound())
 						continue;
@@ -159,6 +160,8 @@ Action BonusRound_RollTimer(Handle hTimer, float flEndTime)
 					break;
 				}
 			}
+
+			delete aClone;
 		}
 
 		if (flTime + 1.0 >= flEndTime)

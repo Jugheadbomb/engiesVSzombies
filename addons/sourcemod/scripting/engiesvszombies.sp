@@ -784,7 +784,7 @@ void Client_WeaponSwitchPost(int iClient, int iWeapon)
 	static int iPreviousWeapon[TF_MAXPLAYERS];
 
 	WeaponConfig weapon;
-	if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
+	if (iWeapon > MaxClients && g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
 	{
 		DataPack pack;
 		CreateDataTimer(GetEntPropFloat(iWeapon, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime(), Timer_GiveAttribs, pack);

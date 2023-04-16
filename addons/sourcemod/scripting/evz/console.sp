@@ -105,10 +105,15 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 		{
 			TF2_ChangeClientTeam(iClient, TFTeam_Zombie);
 			TF2_RespawnPlayer2(iClient);
-			return Plugin_Handled;
 		}
 		else if (StrEqual(sArg, "spectate", false))
+		{
+			// Don't allow zombies to skip round
+			if (IsZombie(iClient) && GetPlayerCount(TFTeam_Zombie) <= 3)
+				return Plugin_Handled;
+
 			return Plugin_Continue;
+		}
 
 		return Plugin_Handled;
 	}

@@ -28,10 +28,6 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 	else if (StrEqual(sCommand, "autoteam", false))
 		strcopy(sArg, sizeof(sArg), "autoteam");
 
-	// Check if client is trying to skip playing as zombie by joining spectator
-	if (StrEqual(sArg, "spectate", false))
-		CheckZombieBypass(iClient);
-
 	sSurTeam = (TFTeam_Zombie == TFTeam_Blue) ? "red" : "blue";
 	sZomTeam = (TFTeam_Zombie == TFTeam_Blue) ? "blue" : "red";
 
@@ -112,6 +108,8 @@ Action Console_JoinTeam(int iClient, const char[] sCommand, int iArgc)
 			if (IsZombie(iClient) && GetPlayerCount(TFTeam_Zombie) <= 3)
 				return Plugin_Handled;
 
+			// Check if client is trying to skip playing as zombie by joining spectator
+			CheckZombieBypass(iClient);
 			return Plugin_Continue;
 		}
 

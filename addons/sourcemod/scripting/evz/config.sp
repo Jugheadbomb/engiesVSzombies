@@ -218,7 +218,7 @@ void Config_Init()
 
 void Config_Refresh()
 {
-	g_sConvars.Clear();
+	g_aWeapons.Clear();
 
 	KeyValues kv = Config_LoadFile(CONFIG_PATH);
 	if (!kv)

@@ -6,7 +6,10 @@ enum FindValue
 	Value_Classname
 };
 
-enum struct WeaponConfig
+static ArrayList g_aWeapons;
+static StringMap g_sConvars;
+
+enum struct Weapon
 {
 	int iIndex;
 	char sClassname[64];
@@ -50,14 +53,14 @@ enum struct WeaponConfig
 	}
 }
 
-methodmap WeaponList < ArrayList
+methodmap WeaponList
 {
-	public WeaponList()
+	public static ArrayList GetList()
 	{
-		return view_as<WeaponList>(new ArrayList(sizeof(WeaponConfig)));
+		return g_aWeapons;
 	}
 
-	public void LoadSection(KeyValues kv)
+	public static void LoadSection(KeyValues kv)
 	{
 		if (kv.JumpToKey("weapons", false))
 		{
@@ -65,9 +68,9 @@ methodmap WeaponList < ArrayList
 			{
 				do
 				{
-					WeaponConfig weapon;
+					Weapon weapon;
 					if (weapon.ReadFromKv(kv))
-						this.PushArray(weapon, sizeof(weapon));
+						g_aWeapons.PushArray(weapon, sizeof(weapon));
 				}
 				while (kv.GotoNextKey());
 				kv.GoBack();
@@ -76,40 +79,40 @@ methodmap WeaponList < ArrayList
 		}
 	}
 
-	public bool GetByEntity(int iWeapon, WeaponConfig weapon, FindValue findval)
+	public static bool GetByEntity(int iWeapon, Weapon weapon, FindValue findval)
 	{
 		switch (findval)
 		{
 			case Value_Index:
 			{
 				int index = GetEntProp(iWeapon, Prop_Send, "m_iItemDefinitionIndex");
-				return this.GetByDefIndex(index, weapon);
+				return WeaponList.GetByDefIndex(index, weapon);
 			}
 			case Value_Classname:
 			{
 				char sClassname[64];
 				GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
-				return this.GetByClassname(sClassname, weapon);
+				return WeaponList.GetByClassname(sClassname, weapon);
 			}
 		}
 
 		return false;
 	}
 
-	public bool GetByDefIndex(int index, WeaponConfig weapon)
+	public static bool GetByDefIndex(int index, Weapon weapon)
 	{
-		int i = this.FindValue(index, WeaponConfig::iIndex);
+		int i = g_aWeapons.FindValue(index, Weapon::iIndex);
 		if (i != -1)
-			return !!this.GetArray(i, weapon);
+			return !!g_aWeapons.GetArray(i, weapon);
 
 		return false;
 	}
 
-	public bool GetByClassname(const char[] sClassname, WeaponConfig weapon)
+	public static bool GetByClassname(const char[] sClassname, Weapon weapon)
 	{
-		for (int i = 0; i < this.Length; i++)
+		for (int i = 0; i < g_aWeapons.Length; i++)
 		{
-			if (!this.GetArray(i, weapon, sizeof(weapon)))
+			if (!g_aWeapons.GetArray(i, weapon, sizeof(weapon)))
 				continue;
 
 			if (StrEqual(weapon.sClassname, sClassname, false))
@@ -120,14 +123,14 @@ methodmap WeaponList < ArrayList
 	}
 }
 
-methodmap ConvarInfo < StringMap
+methodmap ConvarInfo
 {
-	public ConvarInfo()
+	public static StringMap GetMap()
 	{
-		return view_as<ConvarInfo>(new StringMap());
+		return g_sConvars;
 	}
 
-	public void LoadSection(KeyValues kv)
+	public static void LoadSection(KeyValues kv)
 	{
 		if (kv.JumpToKey("cvars", false))
 		{
@@ -142,7 +145,7 @@ methodmap ConvarInfo < StringMap
 					kv.GetString(NULL_STRING, sValue, sizeof(sValue), "");
 
 					// Set value to StringMap and convar
-					this.SetString(sName, sValue);
+					g_sConvars.SetString(sName, sValue);
 
 					ConVar convar = FindConVar(sName);
 					if (convar)
@@ -155,46 +158,46 @@ methodmap ConvarInfo < StringMap
 		}
 	}
 
-	public ConVar Create(const char[] sName, const char[] sValue, const char[] sDesp, int iFlags=0, bool bMin=false, float flMin=0.0, bool bMax=false, float flMax=0.0)
+	public static ConVar Create(const char[] sName, const char[] sValue, const char[] sDesp, int iFlags=0, bool bMin=false, float flMin=0.0, bool bMax=false, float flMax=0.0)
 	{
 		ConVar convar = CreateConVar(sName, sValue, sDesp, iFlags, bMin, flMin, bMax, flMax);
-		this.SetString(sName, sValue);
+		g_sConvars.SetString(sName, sValue);
 		convar.AddChangeHook(Config_ConvarChanged);
 		return convar;
 	}
 
-	public void Changed(ConVar convar, const char[] sValue)
+	public static void Changed(ConVar convar, const char[] sValue)
 	{
 		char sName[128];
 		convar.GetName(sName, sizeof(sName));
-		this.SetString(sName, sValue);
+		g_sConvars.SetString(sName, sValue);
 	}
 
-	public int LookupInt(const char[] sName)
+	public static int LookupInt(const char[] sName)
 	{
 		char sValue[128];
-		this.GetString(sName, sValue, sizeof(sValue));
+		g_sConvars.GetString(sName, sValue, sizeof(sValue));
 		return StringToInt(sValue);
 	}
 
-	public float LookupFloat(const char[] sName)
+	public static float LookupFloat(const char[] sName)
 	{
 		char sValue[128];
-		this.GetString(sName, sValue, sizeof(sValue));
+		g_sConvars.GetString(sName, sValue, sizeof(sValue));
 		return StringToFloat(sValue);
 	}
 
-	public bool LookupBool(const char[] sName)
+	public static bool LookupBool(const char[] sName)
 	{
 		char sValue[128];
-		this.GetString(sName, sValue, sizeof(sValue));
+		g_sConvars.GetString(sName, sValue, sizeof(sValue));
 		return !!StringToInt(sValue);
 	}
 
-	public bool LookupIntArray(const char[] sName, int[] iArray, int iLength)
+	public static bool LookupIntArray(const char[] sName, int[] iArray, int iLength)
 	{
 		char sValue[128];
-		this.GetString(sName, sValue, sizeof(sValue));
+		g_sConvars.GetString(sName, sValue, sizeof(sValue));
 
 		char[][] sArray = new char[iLength][12];
 		if (ExplodeString(sValue, " ", sArray, iLength, 12) != iLength)
@@ -207,25 +210,22 @@ methodmap ConvarInfo < StringMap
 	}
 }
 
-WeaponList g_WeaponList;
-ConvarInfo g_ConvarInfo;
-
 void Config_Init()
 {
-	g_WeaponList = new WeaponList();
-	g_ConvarInfo = new ConvarInfo();
+	g_aWeapons = new ArrayList(sizeof(Weapon));
+	g_sConvars = new StringMap();
 }
 
 void Config_Refresh()
 {
-	g_WeaponList.Clear();
+	g_sConvars.Clear();
 
 	KeyValues kv = Config_LoadFile(CONFIG_PATH);
 	if (!kv)
 		return;
 
-	g_WeaponList.LoadSection(kv);
-	g_ConvarInfo.LoadSection(kv);
+	WeaponList.LoadSection(kv);
+	ConvarInfo.LoadSection(kv);
 	delete kv;
 }
 
@@ -254,5 +254,5 @@ KeyValues Config_LoadFile(const char[] configFile)
 
 void Config_ConvarChanged(ConVar convar, const char[] sOldValue, const char[] sNewValue)
 {
-	g_ConvarInfo.Changed(convar, sNewValue);
+	ConvarInfo.Changed(convar, sNewValue);
 }

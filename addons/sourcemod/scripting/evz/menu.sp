@@ -9,7 +9,7 @@ void Menu_DisplayMain(int iClient)
 	Menu_AddItemTranslation(hMenu, "team_survivor", "#Menu_MainTeamSurvivor", iClient);
 	Menu_AddItemTranslation(hMenu, "team_zombie", "#Menu_MainTeamZombie", iClient);
 	Menu_AddItemTranslation(hMenu, "balances", "#Menu_MainBalances", iClient);
-	if (g_ConvarInfo.LookupBool("evz_bonus_rounds_enable"))
+	if (ConvarInfo.LookupBool("evz_bonus_rounds_enable"))
 		Menu_AddItemTranslation(hMenu, "bonusrounds", "#Menu_MainBonusRounds", iClient);
 
 	hMenu.Display(iClient, MENU_TIME_FOREVER);
@@ -75,10 +75,10 @@ void Menu_DisplayBalances(int iClient, int iSelection = -1)
 	hMenu.SetTitle("%T", "#Menu_MainBalances", iClient);
 
 	char sBuffer[16];
-	for (int i = 0; i < g_WeaponList.Length; i++)
+	for (int i = 0; i < WeaponList.GetList().Length; i++)
 	{
-		WeaponConfig weapon;
-		g_WeaponList.GetArray(i, weapon, sizeof(weapon));
+		Weapon weapon;
+		WeaponList.GetList().GetArray(i, weapon, sizeof(weapon));
 
 		Format(sBuffer, sizeof(sBuffer), "%i", i);
 		Menu_AddItemTranslation(hMenu, sBuffer, weapon.sName, iClient);
@@ -101,8 +101,8 @@ int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
 			char sInfo[16];
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
-			WeaponConfig weapon;
-			g_WeaponList.GetArray(StringToInt(sInfo), weapon, sizeof(weapon));
+			Weapon weapon;
+			WeaponList.GetList().GetArray(StringToInt(sInfo), weapon, sizeof(weapon));
 			Menu_DisplayWeapon(iClient, weapon);
 
 			g_iMenuSelection[iClient] = GetMenuSelectionPosition();
@@ -118,7 +118,7 @@ int Menu_SelectBalances(Menu hMenu, MenuAction action, int iClient, int iSlot)
 	return 0;
 }
 
-void Menu_DisplayWeapon(int iClient, WeaponConfig weapon)
+void Menu_DisplayWeapon(int iClient, Weapon weapon)
 {
 	char sBuffer[512];
 	Menu hMenu = new Menu(Menu_SelectWeapon);
@@ -157,10 +157,10 @@ void Menu_DisplayBonusRounds(int iClient, int iSelection = -1)
 	hMenu.SetTitle("%T", "#Menu_MainBonusRounds", iClient);
 
 	char sBuffer[16];
-	for (int i = 0; i < g_aRounds.Length; i++)
+	for (int i = 0; i < RoundList.GetList().Length; i++)
 	{
 		BonusRound round;
-		if (g_aRounds.GetArray(i, round) && round.bEnabled)
+		if (RoundList.GetList().GetArray(i, round) && round.bEnabled)
 		{
 			Format(sBuffer, sizeof(sBuffer), "%i", i);
 			Menu_AddItemTranslation(hMenu, sBuffer, round.sName, iClient, round.sDesc[0] ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
@@ -185,7 +185,7 @@ int Menu_SelectBonusRounds(Menu hMenu, MenuAction action, int iClient, int iSlot
 			hMenu.GetItem(iSlot, sInfo, sizeof(sInfo));
 
 			BonusRound round;
-			if (g_aRounds.GetArray(StringToInt(sInfo), round))
+			if (RoundList.GetList().GetArray(StringToInt(sInfo), round))
 				Menu_DisplayRound(iClient, round);
 
 			g_iMenuSelection[iClient] = GetMenuSelectionPosition();

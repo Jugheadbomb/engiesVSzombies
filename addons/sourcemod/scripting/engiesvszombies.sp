@@ -46,7 +46,6 @@ Cookie g_cForceZombieStart;
 bool g_bLastSurvivor;
 
 EVZRoundState g_nRoundState;
-ArrayList g_aRounds;
 
 enum struct Player
 {
@@ -117,8 +116,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
-	g_aRounds = new ArrayList(sizeof(BonusRound));
-
 	mp_autoteambalance = FindConVar("mp_autoteambalance");
 	mp_scrambleteams_auto = FindConVar("mp_scrambleteams_auto");
 	mp_disable_respawn_times = FindConVar("mp_disable_respawn_times");
@@ -143,20 +140,20 @@ public void OnPluginStart()
 	Event_Init();
 	SDK_Init();
 
-	g_ConvarInfo.Create("evz_round_time", "300", "Round time in seconds", _, true, 1.0);
-	g_ConvarInfo.Create("evz_setup_time", "30", "Setup time in seconds", _, true, 1.0);
-	g_ConvarInfo.Create("evz_zombie_boost_time", "60", "Time when zombies are being boosted", _, true, 0.0);
-	g_ConvarInfo.Create("evz_ratio", "0.78", "Percentage of players that start as survivors", _, true, 0.01, true, 1.0);
-	g_ConvarInfo.Create("evz_melee_ignores_teammates", "1", "If enabled, melee hits will ignore teammates", _, true, 0.0, true, 1.0);
-	g_ConvarInfo.Create("evz_bonus_rounds_enable", "1", "Enable/Disable bonus rounds", _, true, 0.0, true, 1.0);
-	g_ConvarInfo.Create("evz_bonus_rounds_chance", "0.1", "Chance to start random bonus round", _, true, 0.0, true, 1.0);
-	g_ConvarInfo.Create("evz_zombie_teleporters", "1", "If enabled, zombies will be allowed to use teleporters", _, true, 0.0, true, 1.0);
-	g_ConvarInfo.Create("evz_zombie_respawn_time", "6.0", "Zombies respawn time in seconds", _, true, 0.0, true, 12.0);
-	g_ConvarInfo.Create("evz_zombie_speed_boost", "365.0", "Zombies speed when boosted", _, true, 1.0, true, 520.0);
-	g_ConvarInfo.Create("evz_zombie_boost_color", "144 238 144 255", "Zombies render color when boosted");
-	g_ConvarInfo.Create("evz_zombie_doublejump_height", "280.0", "Zombies double jump height", _, true, 0.0);
-	g_ConvarInfo.Create("evz_zombie_doublejump_height_boost", "380.0", "Zombies double jump height when boosted", _, true, 0.0);
-	g_ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_round_time", "300", "Round time in seconds", _, true, 1.0);
+	ConvarInfo.Create("evz_setup_time", "30", "Setup time in seconds", _, true, 1.0);
+	ConvarInfo.Create("evz_zombie_boost_time", "60", "Time when zombies are being boosted", _, true, 0.0);
+	ConvarInfo.Create("evz_ratio", "0.78", "Percentage of players that start as survivors", _, true, 0.01, true, 1.0);
+	ConvarInfo.Create("evz_melee_ignores_teammates", "1", "If enabled, melee hits will ignore teammates", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_bonus_rounds_enable", "1", "Enable/Disable bonus rounds", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_bonus_rounds_chance", "0.1", "Chance to start random bonus round", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_zombie_teleporters", "1", "If enabled, zombies will be allowed to use teleporters", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_zombie_respawn_time", "6.0", "Zombies respawn time in seconds", _, true, 0.0, true, 12.0);
+	ConvarInfo.Create("evz_zombie_speed_boost", "365.0", "Zombies speed when boosted", _, true, 1.0, true, 520.0);
+	ConvarInfo.Create("evz_zombie_boost_color", "144 238 144 255", "Zombies render color when boosted");
+	ConvarInfo.Create("evz_zombie_doublejump_height", "280.0", "Zombies double jump height", _, true, 0.0);
+	ConvarInfo.Create("evz_zombie_doublejump_height_boost", "380.0", "Zombies double jump height when boosted", _, true, 0.0);
+	ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things", _, true, 0.0, true, 1.0);
 
 	RegConsoleCmd("sm_evz", Command_MainMenu, "Display main menu of gamemode");
 	RegAdminCmd("sm_evz_refresh", Command_RefreshConfig, ADMFLAG_CONVARS, "Refresh config with weapon balances, bonus rounds and cvars");
@@ -172,7 +169,7 @@ public void OnPluginStart()
 public void OnMapStart()
 {
 	PrecacheScriptSound("Announcer.AM_LastManAlive04");
-	BonusRound_Precache();
+	RoundList.Precache();
 }
 
 public void OnConfigsExecuted()
@@ -200,7 +197,7 @@ public void OnConfigsExecuted()
 public void OnMapEnd()
 {
 	g_nRoundState = EVZRoundState_End;
-	BonusRound_Expire();
+	RoundList.EndRound();
 }
 
 public void OnPluginEnd()
@@ -208,7 +205,7 @@ public void OnPluginEnd()
 	if (GameRules_GetRoundState() >= RoundState_Preround)
 		TF2_EndRound(TFTeam_Unassigned);
 
-	BonusRound_Expire();
+	RoundList.EndRound();
 	Plugin_Cvars(false);
 
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
@@ -226,7 +223,7 @@ public void OnClientPutInServer(int iClient)
 	SDK_OnClientConnect(iClient);
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnClientPutInServer"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnClientPutInServer"))
 	{
 		Call_PushCell(iClient);
 		Call_Finish();
@@ -256,7 +253,7 @@ public void OnEntityCreated(int iEntity, const char[] sClassname)
 		SDKHook(iEntity, SDKHook_Spawn, Point_Spawn);
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnEntityCreated"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnEntityCreated"))
 	{
 		Call_PushCell(iEntity);
 		Call_PushString(sClassname);
@@ -267,7 +264,7 @@ public void OnEntityCreated(int iEntity, const char[] sClassname)
 public void OnEntityDestroyed(int iEntity)
 {
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnEntityDestroyed"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnEntityDestroyed"))
 	{
 		Call_PushCell(iEntity);
 		Call_Finish();
@@ -291,7 +288,7 @@ public void OnGameFrame()
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("Update"))
+	if (RoundList.GetActive(round) && round.StartFunction("Update"))
 		Call_Finish();
 }
 
@@ -319,7 +316,7 @@ public Action TF2_OnIsHolidayActive(TFHoliday nHoliday, bool &bResult)
 public void TF2_OnConditionAdded(int iClient, TFCond cond)
 {
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnConditionAdded"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnConditionAdded"))
 	{
 		Call_PushCell(iClient);
 		Call_PushCell(cond);
@@ -330,7 +327,7 @@ public void TF2_OnConditionAdded(int iClient, TFCond cond)
 public void TF2_OnConditionRemoved(int iClient, TFCond cond)
 {
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnConditionRemoved"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnConditionRemoved"))
 	{
 		Call_PushCell(iClient);
 		Call_PushCell(cond);
@@ -340,7 +337,7 @@ public void TF2_OnConditionRemoved(int iClient, TFCond cond)
 
 public Action TF2_OnPlayerTeleport(int iClient, int iTeleporter, bool &bResult)
 {
-	if (IsZombie(iClient) && g_ConvarInfo.LookupBool("evz_zombie_teleporters"))
+	if (IsZombie(iClient) && ConvarInfo.LookupBool("evz_zombie_teleporters"))
 	{
 		bResult = true;
 		return Plugin_Changed;
@@ -351,8 +348,8 @@ public Action TF2_OnPlayerTeleport(int iClient, int iTeleporter, bool &bResult)
 
 public Action TF2_CalcIsAttackCritical(int iClient, int iWeapon, char[] sClassname, bool &bResult)
 {
-	WeaponConfig weapon;
-	if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
+	Weapon weapon;
+	if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
 	{
 		// Gunslinger punch combo hacks
 		if (StrEqual(sClassname, "tf_weapon_robot_arm"))
@@ -399,9 +396,9 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 			GetEntPropVector(iClient, Prop_Data, "m_vecVelocity", vecVel);
 
 			if (g_nRoundState == EVZRoundState_Boost && IsZombie(iClient))
-				vecVel[2] = g_ConvarInfo.LookupFloat("evz_zombie_doublejump_height_boost");
+				vecVel[2] = ConvarInfo.LookupFloat("evz_zombie_doublejump_height_boost");
 			else
-				vecVel[2] = g_ConvarInfo.LookupFloat("evz_zombie_doublejump_height");
+				vecVel[2] = ConvarInfo.LookupFloat("evz_zombie_doublejump_height");
 
 			TeleportEntity(iClient, NULL_VECTOR, NULL_VECTOR, vecVel);
 		}
@@ -412,13 +409,13 @@ public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float ve
 	int iActivewep = GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon");
 	if (iActivewep > MaxClients)
 	{
-		WeaponConfig weapon;
-		if (g_WeaponList.GetByEntity(iActivewep, weapon, Value_Index) && weapon.bBlockSecondary)
+		Weapon weapon;
+		if (WeaponList.GetByEntity(iActivewep, weapon, Value_Index) && weapon.bBlockSecondary)
 			SetEntPropFloat(iActivewep, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 1.0);
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnPlayerRunCmd"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnPlayerRunCmd"))
 	{
 		Call_PushCell(iClient);
 		Call_PushCellRef(iButtons);
@@ -440,7 +437,7 @@ Action SoundHook(int iClients[MAXPLAYERS], int &iNumClients, char sSound[PLATFOR
 	Action action = Plugin_Continue;
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnSoundPlayed"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnSoundPlayed"))
 	{
 		Call_PushArrayEx(iClients, sizeof(iClients), SM_PARAM_COPYBACK);
 		Call_PushCellRef(iNumClients);
@@ -551,7 +548,7 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnSetupFinished"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnSetupFinished"))
 		Call_Finish();
 
 	Forward_OnZombiesRelease();
@@ -576,9 +573,9 @@ Action Timer_CreateRoundTimer(Handle hTimer)
 
 	DispatchKeyValue(iTimer, "show_in_hud", "1");
 	DispatchKeyValue(iTimer, "start_paused", "0");
-	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", g_ConvarInfo.LookupInt("evz_setup_time"));
-	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", g_ConvarInfo.LookupInt("evz_round_time"));
-	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", g_ConvarInfo.LookupInt("evz_round_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nSetupTimeLength", ConvarInfo.LookupInt("evz_setup_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerInitialLength", ConvarInfo.LookupInt("evz_round_time"));
+	SetEntProp(iTimer, Prop_Data, "m_nTimerMaxLength", ConvarInfo.LookupInt("evz_round_time"));
 
 	DispatchSpawn(iTimer);
 	AcceptEntityInput(iTimer, "Enable");
@@ -631,7 +628,7 @@ Action Timer_Main(Handle hTimer)
 	if (iTimer > MaxClients && g_nRoundState == EVZRoundState_Active)
 	{
 		float flTimeRemaining = GetEntPropFloat(iTimer, Prop_Send, "m_flTimerEndTime") - GetGameTime();
-		if (RoundToZero(flTimeRemaining) <= g_ConvarInfo.LookupInt("evz_zombie_boost_time"))
+		if (RoundToZero(flTimeRemaining) <= ConvarInfo.LookupInt("evz_zombie_boost_time"))
 		{
 			// Toggle zombie boost
 			g_nRoundState = EVZRoundState_Boost;
@@ -650,7 +647,7 @@ Action Timer_Main(Handle hTimer)
 	}
 
 	CheckWinCondition();
-	SetTeamRespawnTime(TFTeam_Zombie, g_ConvarInfo.LookupFloat("evz_zombie_respawn_time"));
+	SetTeamRespawnTime(TFTeam_Zombie, ConvarInfo.LookupFloat("evz_zombie_respawn_time"));
 
 	// Zombie boost hud message
 	if (g_nRoundState == EVZRoundState_Boost)
@@ -661,7 +658,7 @@ Action Timer_Main(Handle hTimer)
 
 	// Bonusround hud message
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.bShowInHUD)
+	if (RoundList.GetActive(round) && round.bShowInHUD)
 	{
 		SetHudTextParams(-1.0, 0.09, 1.1, 0, 255, 255, 200);
 		ShowHudTextAll(CHANNEL_BONUSROUND, "%t: %t", "#Hud_BonusRound", round.sName);
@@ -742,8 +739,8 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 
 		if (iWeapon > MaxClients && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker) && IsSurvivor(iAttacker))
 		{
-			WeaponConfig weapon;
-			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
+			Weapon weapon;
+			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
 			{
 				if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
 				{
@@ -758,7 +755,7 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnTakeDamage"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnTakeDamage"))
 	{
 		Call_PushCell(iVictim);
 		Call_PushCellRef(iAttacker);
@@ -783,8 +780,8 @@ void Client_WeaponSwitchPost(int iClient, int iWeapon)
 {
 	static int iPreviousWeapon[TF_MAXPLAYERS];
 
-	WeaponConfig weapon;
-	if (iWeapon > MaxClients && g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
+	Weapon weapon;
+	if (iWeapon > MaxClients && WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
 	{
 		DataPack pack;
 		CreateDataTimer(GetEntPropFloat(iWeapon, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime(), Timer_GiveAttribs, pack);
@@ -797,7 +794,7 @@ void Client_WeaponSwitchPost(int iClient, int iWeapon)
 	{
 		if (HasEntProp(iPreviousWeapon[iClient], Prop_Send, "m_iItemDefinitionIndex"))
 		{
-			if (g_WeaponList.GetByEntity(iPreviousWeapon[iClient], weapon, Value_Index) && weapon.sAttribSwitch[0])
+			if (WeaponList.GetByEntity(iPreviousWeapon[iClient], weapon, Value_Index) && weapon.sAttribSwitch[0])
 			{
 				char sAttribs[32][32];
 				int iCount = ExplodeString(weapon.sAttribSwitch, " ; ", sAttribs, sizeof(sAttribs), sizeof(sAttribs));
@@ -891,11 +888,11 @@ Action Command_StartBonus(int iClient, int iArgc)
 		char id[8];
 		GetCmdArg(1, id, sizeof(id));
 
-		int index = g_aRounds.FindString(id);
+		int index = RoundList.GetList().FindString(id);
 		if (index != -1)
 		{
 			BonusRound round;
-			if (g_aRounds.GetArray(index, round) && !BonusRound_StartRound(round))
+			if (RoundList.GetList().GetArray(index, round) && !RoundList.StartRound(round))
 				CPrintToChat(iClient, "Failed to start round: %t", round.sName);
 		}
 		else
@@ -939,7 +936,7 @@ Action OnGiveNamedItem(int iClient, int iIndex)
 		}
 	}
 
-	if (g_ConvarInfo.LookupBool("evz_holiday_things"))
+	if (ConvarInfo.LookupBool("evz_holiday_things"))
 	{
 		if (iSlot > WeaponSlot_BuilderEngie && TF2_IsHolidayActive(TFHoliday_Christmas))
 		{
@@ -952,7 +949,7 @@ Action OnGiveNamedItem(int iClient, int iIndex)
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnGiveNamedItem"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnGiveNamedItem"))
 	{
 		Call_PushCell(iClient);
 		Call_PushCell(iIndex);
@@ -1017,10 +1014,10 @@ void CheckZombieBypass(int iClient)
 
 void BoostZombie(int iClient)
 {
-	TF2_SetSpeed(iClient, g_ConvarInfo.LookupFloat("evz_zombie_speed_boost"));
+	TF2_SetSpeed(iClient, ConvarInfo.LookupFloat("evz_zombie_speed_boost"));
 
 	int iColor[4];
-	if (g_ConvarInfo.LookupIntArray("evz_zombie_boost_color", iColor, sizeof(iColor)))
+	if (ConvarInfo.LookupIntArray("evz_zombie_boost_color", iColor, sizeof(iColor)))
 	{
 		SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
 		SetEntityRenderColor(iClient, iColor[0], iColor[1], iColor[2], iColor[3]);

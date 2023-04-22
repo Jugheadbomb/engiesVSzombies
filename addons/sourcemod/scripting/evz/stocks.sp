@@ -175,14 +175,14 @@ bool IsAllowedToBuild(int iClient, TFObjectType nObjectType)
 			if (iWeapon == -1)
 				continue;
 
-			WeaponConfig weapon;
-			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Classname) && weapon.bSentry)
+			Weapon weapon;
+			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Classname) && weapon.bSentry)
 			{
 				bReturn = true;
 				break;
 			}
 
-			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.bSentry)
+			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.bSentry)
 			{
 				bReturn = true;
 				break;
@@ -191,7 +191,7 @@ bool IsAllowedToBuild(int iClient, TFObjectType nObjectType)
 	}
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("IsAllowedToBuild"))
+	if (RoundList.GetActive(round) && round.StartFunction("IsAllowedToBuild"))
 	{
 		Call_PushCell(iClient);
 		Call_PushCell(nObjectType);

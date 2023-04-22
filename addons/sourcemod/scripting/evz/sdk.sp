@@ -57,7 +57,7 @@ MRESReturn DHook_MakeHolidayPackPre(int iAmmoPack)
 
 MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam params)
 {
-	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
+	if (!ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
 		return MRES_Ignored;
 
 	// Enable MvM for this function for melee trace hack
@@ -85,7 +85,7 @@ MRESReturn DHook_DoSwingTraceInternalPre(int iMelee, DHookReturn ret, DHookParam
 
 MRESReturn DHook_DoSwingTraceInternalPost(int iMelee, DHookReturn ret, DHookParam params)
 {
-	if (!g_ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
+	if (!ConvarInfo.LookupBool("evz_melee_ignores_teammates"))
 		return MRES_Ignored;
 
 	// Disable MvM so there are no lingering effects

@@ -114,7 +114,7 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	SortIntegers(iClients, iLength, Sort_Random);
 
 	// Calculate team counts. At least one survivor must exist
-	iSurvivorCount = RoundToFloor(iLength * g_ConvarInfo.LookupFloat("evz_ratio"));
+	iSurvivorCount = RoundToFloor(iLength * ConvarInfo.LookupFloat("evz_ratio"));
 	if (iSurvivorCount == 0 && iLength > 0)
 		iSurvivorCount = 1;
 
@@ -184,17 +184,17 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 			if (iWeapon == -1)
 				continue;
 
-			WeaponConfig weapon;
-			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Index))
+			Weapon weapon;
+			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index))
 			{
 				if (weapon.iIndexPrefab >= 0)
-					g_WeaponList.GetByDefIndex(weapon.iIndexPrefab, weapon);
+					WeaponList.GetByDefIndex(weapon.iIndexPrefab, weapon);
 
 				if (weapon.sName[0] && weapon.sDesc[0])
 					CPrintToChat(iClient, "{immortal}%t: %t", weapon.sName, weapon.sDesc);
 			}
 
-			if (g_WeaponList.GetByEntity(iWeapon, weapon, Value_Classname))
+			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Classname))
 			{
 				if (weapon.sName[0] && weapon.sDesc[0])
 					CPrintToChat(iClient, "{immortal}%t: %t", weapon.sName, weapon.sDesc);
@@ -202,11 +202,11 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 		}
 	}
 
-	BonusRound_Expire();
+	RoundList.EndRound();
 
-	if (g_ConvarInfo.LookupBool("evz_bonus_rounds_enable") && GameRules_GetProp("m_nRoundsPlayed") >= 1)
+	if (ConvarInfo.LookupBool("evz_bonus_rounds_enable") && GameRules_GetProp("m_nRoundsPlayed") >= 1)
 	{
-		if (GetURandomFloat() < g_ConvarInfo.LookupFloat("evz_bonus_rounds_chance"))
+		if (GetURandomFloat() < ConvarInfo.LookupFloat("evz_bonus_rounds_chance"))
 			BonusRound_StartRoll();
 	}
 
@@ -219,7 +219,7 @@ void Event_RoundEnd(Event event, const char[] sName, bool bDontBroadcast)
 	g_nRoundState = EVZRoundState_End;
 	SendEntityInput("func_respawnroom", "DisableAndEndTouch");
 
-	BonusRound_Expire();
+	RoundList.EndRound();
 	SetGlow();
 }
 
@@ -292,11 +292,11 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 		char sClassname[64];
 		GetEntityClassname(iWeapon, sClassname, sizeof(sClassname));
 
-		int iLength = g_WeaponList.Length;
+		int iLength = WeaponList.GetList().Length;
 		for (int i = 0; i < iLength; i++)
 		{
-			WeaponConfig weapon;
-			g_WeaponList.GetArray(i, weapon, sizeof(weapon));
+			Weapon weapon;
+			WeaponList.GetList().GetArray(i, weapon, sizeof(weapon));
 
 			if (StrEqual(weapon.sClassname, sClassname))
 			{
@@ -317,7 +317,7 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 					int iPrefab = weapon.iIndexPrefab;
 					for (int j = 0; j < iLength; j++)
 					{
-						g_WeaponList.GetArray(j, weapon, sizeof(weapon));
+						WeaponList.GetList().GetArray(j, weapon, sizeof(weapon));
 						if (weapon.iIndex == iPrefab)
 							break;
 					}
@@ -381,11 +381,11 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	AddVision(iClient, TF_VISION_FILTER_HALLOWEEN);
 
 	// Santa hat
-	if (g_ConvarInfo.LookupBool("evz_holiday_things") && TF2_IsHolidayActive(TFHoliday_Christmas))
+	if (ConvarInfo.LookupBool("evz_holiday_things") && TF2_IsHolidayActive(TFHoliday_Christmas))
 		TF2_CreateAndEquipWeapon(iClient, SANTA_HAT);
 
 	BonusRound round;
-	if (BonusRound_GetActive(round) && round.StartFunction("OnPlayerSpawn"))
+	if (RoundList.GetActive(round) && round.StartFunction("OnPlayerSpawn"))
 	{
 		Call_PushCell(iClient);
 		Call_Finish();
@@ -415,8 +415,8 @@ void Event_PlayerDeath(Event event, const char[] sName, bool bDontBroadcast)
 		{
 			if (!StrEqual(sInflictor, "obj_sentrygun", false)) // Not sentry kill
 			{
-				WeaponConfig weapon;
-				if (g_WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
+				Weapon weapon;
+				if (WeaponList.GetByDefIndex(event.GetInt("weapon_def_index"), weapon) && weapon.iKillComboCrit)
 				{
 					if (++g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
 						CPrintToChat(iAttacker, "%t", "#Chat_KillComboCritCharged");

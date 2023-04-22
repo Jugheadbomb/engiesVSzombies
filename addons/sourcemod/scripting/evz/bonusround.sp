@@ -1,6 +1,8 @@
 #define BONUSROUND_CONFIG "configs/evz/bonusrounds.cfg"
 #define BONUSROUND_ROLLSOUND "evz/bonusround.wav"
 
+static ArrayList g_aRounds;
+
 enum struct BonusRound
 {
 	// Static
@@ -17,7 +19,7 @@ enum struct BonusRound
 	// Runtime
 	bool bActive;
 
-	void Parse(KeyValues kv)
+	void ReadFromKv(KeyValues kv)
 	{
 		if (kv.GetSectionName(this.id, sizeof(this.id)))
 		{
@@ -57,58 +59,135 @@ enum struct BonusRound
 	}
 }
 
-void BonusRound_Init()
+methodmap RoundList
 {
-	char sFilePath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sFilePath, sizeof(sFilePath), BONUSROUND_CONFIG);
-
-	KeyValues kv = new KeyValues("bonusrounds");
-	if (kv.ImportFromFile(sFilePath))
+	public static ArrayList GetList()
 	{
-		if (kv.GotoFirstSubKey(false))
+		return g_aRounds;
+	}
+
+	public static void Init()
+	{
+		char sFilePath[PLATFORM_MAX_PATH];
+		BuildPath(Path_SM, sFilePath, sizeof(sFilePath), BONUSROUND_CONFIG);
+
+		KeyValues kv = new KeyValues("bonusrounds");
+		if (kv.ImportFromFile(sFilePath))
 		{
-			do
+			if (kv.GotoFirstSubKey(false))
 			{
-				BonusRound round;
-				round.Parse(kv);
-
-				if (g_aRounds.FindString(round.id) != -1)
+				do
 				{
-					LogError("Round '%T' has duplicate ID '%s', skipping...", round.sName, LANG_SERVER, round.id);
-					continue;
+					BonusRound round;
+					round.ReadFromKv(kv);
+
+					if (g_aRounds.FindString(round.id) != -1)
+					{
+						LogError("Round '%T' has duplicate ID '%s', skipping...", round.sName, LANG_SERVER, round.id);
+						continue;
+					}
+
+					if (round.StartFunction("Create") && Call_Finish() != SP_ERROR_NONE)
+						continue;
+
+					g_aRounds.PushArray(round);
 				}
-
-				if (round.StartFunction("Create") && Call_Finish() != SP_ERROR_NONE)
-					continue;
-
-				g_aRounds.PushArray(round);
+				while (kv.GotoNextKey(false));
+				kv.GoBack();
 			}
-			while (kv.GotoNextKey(false));
 			kv.GoBack();
 		}
-		kv.GoBack();
-	}
-	else
-		LogError("Could not read from file '%s'", sFilePath);
+		else
+			LogError("Could not read from file '%s'", sFilePath);
 
-	delete kv;
+		delete kv;
+	}
+
+	public static void Precache()
+	{
+		PrepareSound(BONUSROUND_ROLLSOUND);
+
+		for (int i = 0; i < g_aRounds.Length; i++)
+		{
+			BonusRound round;
+			if (g_aRounds.GetArray(i, round) && round.StartFunction("Precache"))
+				Call_Finish();
+		}
+	}
+
+	public static bool GetActive(BonusRound round)
+	{
+		for (int i = 0; i < g_aRounds.Length; i++)
+		{
+			if (g_aRounds.GetArray(i, round) && round.bActive)
+				return true;
+		}
+
+		return false;
+	}
+
+	public static bool StartRound(BonusRound round)
+	{
+		int index = g_aRounds.FindString(round.id);
+		if (index == -1)
+		{
+			LogError("Failed to activate unknown round with id '%s'", round.id);
+			return false;
+		}
+
+		if (round.bSetupOnly && IsActiveRound())
+			return false;
+
+		RoundList.EndRound();
+
+		bool bReturn;
+		if (round.StartFunction("OnStart"))
+		{
+			if (Call_Finish(bReturn) != SP_ERROR_NONE || !bReturn)
+			{
+				LogMessage("Skipped round '%T' because 'OnStart' callback returned false", round.sName, LANG_SERVER);
+				return false;
+			}
+		}
+
+		g_aRounds.Set(index, true, BonusRound::bActive);
+
+		EmitGameSoundToAll("CYOA.NodeActivate");
+
+		if (round.start_sound[0])
+			PlayStaticSound(round.start_sound);
+
+		return true;
+	}
+
+	public static bool EndRound()
+	{
+		for (int i = 0; i < g_aRounds.Length; i++)
+		{
+			BonusRound round;
+			if (g_aRounds.GetArray(i, round) && round.bActive)
+			{
+				g_aRounds.Set(i, false, BonusRound::bActive);
+
+				if (round.StartFunction("OnEnd"))
+					Call_Finish();
+
+				if (round.start_sound[0])
+					StopStaticSound(round.start_sound);
+			}
+		}
+	}
 }
 
-void BonusRound_Precache()
+void BonusRound_Init()
 {
-	PrepareSound(BONUSROUND_ROLLSOUND);
-
-	for (int i = 0; i < g_aRounds.Length; i++)
-	{
-		BonusRound round;
-		if (g_aRounds.GetArray(i, round) && round.StartFunction("Precache"))
-			Call_Finish();
-	}
+	g_aRounds = new ArrayList(sizeof(BonusRound));
+	RoundList.Init();
 }
 
 void BonusRound_StartRoll()
 {
-	BonusRound_Expire();
+	RoundList.EndRound();
 
 	int iEntity = CreateEntityByName("game_text_tf");
 
@@ -167,7 +246,7 @@ Action BonusRound_RollTimer(Handle hTimer, float flEndTime)
 		if (flTime + 1.0 >= flEndTime)
 		{
 			bSelected = false;
-			BonusRound_StartRound(round);
+			RoundList.StartRound(round);
 			return Plugin_Stop;
 		}
 	}
@@ -181,67 +260,4 @@ Action BonusRound_RollTimer(Handle hTimer, float flEndTime)
 		index = 0;
 
 	return Plugin_Continue;
-}
-
-bool BonusRound_GetActive(BonusRound round)
-{
-	for (int i = 0; i < g_aRounds.Length; i++)
-	{
-		if (g_aRounds.GetArray(i, round) && round.bActive)
-			return true;
-	}
-
-	return false;
-}
-
-bool BonusRound_StartRound(BonusRound round)
-{
-	int index = g_aRounds.FindString(round.id);
-	if (index == -1)
-	{
-		LogError("Failed to activate unknown round with id '%s'", round.id);
-		return false;
-	}
-
-	if (round.bSetupOnly && IsActiveRound())
-		return false;
-
-	BonusRound_Expire();
-
-	bool bReturn;
-	if (round.StartFunction("OnStart"))
-	{
-		if (Call_Finish(bReturn) != SP_ERROR_NONE || !bReturn)
-		{
-			LogMessage("Skipped round '%T' because 'OnStart' callback returned false", round.sName, LANG_SERVER);
-			return false;
-		}
-	}
-
-	g_aRounds.Set(index, true, BonusRound::bActive);
-
-	EmitGameSoundToAll("CYOA.NodeActivate");
-
-	if (round.start_sound[0])
-		PlayStaticSound(round.start_sound);
-
-	return true;
-}
-
-void BonusRound_Expire()
-{
-	for (int i = 0; i < g_aRounds.Length; i++)
-	{
-		BonusRound round;
-		if (g_aRounds.GetArray(i, round) && round.bActive)
-		{
-			g_aRounds.Set(i, false, BonusRound::bActive);
-
-			if (round.StartFunction("OnEnd"))
-				Call_Finish();
-
-			if (round.start_sound[0])
-				StopStaticSound(round.start_sound);
-		}
-	}
 }

@@ -763,7 +763,7 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 			{
 				float flRadius = ConvarInfo.LookupFloat("evz_crowd_debuff_radius");
 				int iCount = ConvarInfo.LookupInt("evz_crowd_debuff_count");
-				if (GetNearestAllyCount(iAttacker, flRadius) >= iCount)
+				if (GetNearestAllyCount(iAttacker, flRadius) >= iCount - 1)
 				{
 					flDamage *= ConvarInfo.LookupFloat("evz_crowd_debuff_multiplier");
 					action = Plugin_Changed;

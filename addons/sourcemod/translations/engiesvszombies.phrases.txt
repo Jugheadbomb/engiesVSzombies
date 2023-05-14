@@ -22,11 +22,6 @@
 		"en"		"{immortal}Crit punch is charged! Next attack from this weapon will be {darkorange}critical{immortal}."
 		"ru"		"{immortal}Критический удар заряжен! Следующая атака с этого оружия будет {darkorange}критической{immortal}."
 	}
-	"#Chat_NoActiveRound"
-	{
-		"en"		"{red}No active round"
-		"ru"		"{red}Нет активного раунда"
-	}
 
 	// Jointeam chat messages
 	"#Chat_CantSwitchSetup"
@@ -276,8 +271,8 @@
 	}
 	"#Weapon_Vitasaw_Desc"
 	{
-		"en"		"{green}Damage vs buildings: +15%%, {red}Max HP level: -20 points"
-		"ru"		"{green}Урон по постройкам: +15%%, {red}Уровень здоровья: -20 ед"
+		"en"		"{green}Damage vs buildings: +20%%, no health debuff, {red}Damage vs players: -25%%"
+		"ru"		"{green}Урон по постройкам: +20%%, нет уменьшения здоровья, {red}Урон по игрокам: -25%%"
 	}
 
 	"#Weapon_SolemnVow"

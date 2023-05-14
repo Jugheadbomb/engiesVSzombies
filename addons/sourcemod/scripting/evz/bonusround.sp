@@ -18,6 +18,7 @@ enum struct BonusRound
 
 	// Runtime
 	bool bActive;
+	bool bForced;
 
 	void ReadFromKv(KeyValues kv)
 	{

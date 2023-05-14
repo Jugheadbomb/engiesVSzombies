@@ -895,29 +895,27 @@ Action Command_StartBonus(int iClient, int iArgc)
 	if (iClient == 0)
 		return Plugin_Handled;
 
-	if (g_nRoundState == EVZRoundState_Waiting || g_nRoundState == EVZRoundState_End)
-	{
-		CPrintToChat(iClient, "%t", "#Chat_NoActiveRound");
-		return Plugin_Handled;
-	}
-
+	int index = -1;
 	if (iArgc)
 	{
 		char id[8];
 		GetCmdArg(1, id, sizeof(id));
-
-		int index = RoundList.GetList().FindString(id);
-		if (index != -1)
-		{
-			BonusRound round;
-			if (RoundList.GetList().GetArray(index, round) && !RoundList.StartRound(round))
-				CPrintToChat(iClient, "Failed to start round: %t", round.sName);
-		}
-		else
+		index = RoundList.GetList().FindString(id);
+		if (index == -1)
 			CPrintToChat(iClient, "Failed to force unknown round with ID: %s", id);
 	}
 	else
-		BonusRound_StartRoll();
+		index = GetURandomInt() % RoundList.GetList().Length;
+
+	if (index != -1)
+	{
+		BonusRound round;
+		if (RoundList.GetList().GetArray(index, round))
+		{
+			RoundList.GetList().Set(index, true, BonusRound::bForced);
+			CPrintToChat(iClient, "Next round will be bonus round - %t", round.sName);
+		}
+	}
 
 	return Plugin_Handled;
 }

@@ -206,7 +206,19 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 
 	if (ConvarInfo.LookupBool("evz_bonus_rounds_enable") && GameRules_GetProp("m_nRoundsPlayed") >= 1)
 	{
-		if (GetURandomFloat() < ConvarInfo.LookupFloat("evz_bonus_rounds_chance"))
+		bool bStarted = false;
+		for (int i = 0; i < RoundList.GetList().Length; i++)
+		{
+			BonusRound round;
+			if (RoundList.GetList().GetArray(i, round) && round.bForced)
+			{
+				RoundList.GetList().Set(i, false, BonusRound::bForced);
+				bStarted = RoundList.StartRound(round);
+				break;
+			}
+		}
+
+		if (!bStarted && GetURandomFloat() < ConvarInfo.LookupFloat("evz_bonus_rounds_chance"))
 			BonusRound_StartRoll();
 	}
 

@@ -154,6 +154,10 @@ public void OnPluginStart()
 	ConvarInfo.Create("evz_zombie_doublejump_height", "280.0", "Zombies double jump height", _, true, 0.0);
 	ConvarInfo.Create("evz_zombie_doublejump_height_boost", "380.0", "Zombies double jump height when boosted", _, true, 0.0);
 	ConvarInfo.Create("evz_holiday_things", "1.0", "Enable/Disable holiday things", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_crowd_debuff_enable", "1.0", "Enable/Disable survivor crowd dgm debuff", _, true, 0.0, true, 1.0);
+	ConvarInfo.Create("evz_crowd_debuff_radius", "500.0", "Radius to count survivors for dmg debuff", _, true, 0.0);
+	ConvarInfo.Create("evz_crowd_debuff_count", "4.0", "Count of survivors in crowd for dmg debuff", _, true, 0.0);
+	ConvarInfo.Create("evz_crowd_debuff_multiplier", "0.85", "Crowd damage multiplier", _, true, 0.0, true, 1.0);
 
 	RegConsoleCmd("sm_evz", Command_MainMenu, "Display main menu of gamemode");
 	RegAdminCmd("sm_evz_refresh", Command_RefreshConfig, ADMFLAG_CONVARS, "Refresh config with weapon balances, bonus rounds and cvars");
@@ -737,17 +741,31 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 			}
 		}
 
-		if (iWeapon > MaxClients && 0 < iAttacker <= MaxClients && IsClientInGame(iAttacker) && IsSurvivor(iAttacker))
+		if (0 < iAttacker <= MaxClients && IsClientInGame(iAttacker) && IsSurvivor(iAttacker))
 		{
-			Weapon weapon;
-			if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
+			if (iWeapon > MaxClients)
 			{
-				if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+				Weapon weapon;
+				if (WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.iKillComboCrit)
 				{
-					iDamageType |= DMG_CRIT;
-					flDamage *= 3.0;
+					if (g_Player[iAttacker].iKillComboCount == weapon.iKillComboCrit)
+					{
+						iDamageType |= DMG_CRIT;
+						flDamage *= 3.0;
 
-					g_Player[iAttacker].iKillComboCount = -1; // Set to -1, player_death hook will increment this by one, so it resets to 0
+						g_Player[iAttacker].iKillComboCount = -1; // Set to -1, player_death hook will increment this by one, so it resets to 0
+						action = Plugin_Changed;
+					}
+				}
+			}
+
+			if (ConvarInfo.LookupBool("evz_crowd_debuff_enable"))
+			{
+				float flRadius = ConvarInfo.LookupFloat("evz_crowd_debuff_radius");
+				int iCount = ConvarInfo.LookupInt("evz_crowd_debuff_count");
+				if (GetNearestAllyCount(iAttacker, flRadius) >= iCount)
+				{
+					flDamage *= ConvarInfo.LookupFloat("evz_crowd_debuff_multiplier");
 					action = Plugin_Changed;
 				}
 			}

@@ -320,3 +320,24 @@ void ShowHudTextAll(int iChannel, const char[] sMessage, any ...)
 		}
 	}
 }
+
+int GetNearestAllyCount(int iClient, float flRadius)
+{
+	int iCount = 0;
+	TFTeam nTeam = TF2_GetClientTeam(iClient);
+
+	float vecPos[3], vecTargetPos[3];
+	GetClientAbsOrigin(iClient, vecPos);
+
+	for (int iTarget = 1; iTarget <= MaxClients; iTarget++)
+	{
+		if (iClient == iTarget || !IsClientInGame(iTarget) || !IsPlayerAlive(iTarget) || TF2_GetClientTeam(iTarget) != nTeam)
+			continue;
+
+		GetClientAbsOrigin(iTarget, vecTargetPos);
+		if (GetVectorDistance(vecTargetPos, vecPos) <= flRadius)
+			iCount++;
+	}
+
+	return iCount;
+}

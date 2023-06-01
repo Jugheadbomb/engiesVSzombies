@@ -514,8 +514,8 @@ void RoundTimer_OnSetupFinished(const char[] sOutput, int iCaller, int iActivato
 	int iSurvivors = GetPlayerCount(TFTeam_Survivor, true);
 	int iZombies = GetPlayerCount(TFTeam_Zombie);
 
-	// If less than 15% of players are infected, set round start as imbalanced
-	bool bImbalanced = iZombies && (float(iZombies) / float(iSurvivors + iZombies) <= 0.15);
+	// If less than 20% of players are infected, set round start as imbalanced
+	bool bImbalanced = iZombies && (float(iZombies) / float(iSurvivors + iZombies) <= 0.2);
 
 	SetHudTextParams(-1.0, 0.2, 5.0, 255, 255, 255, 255, 1, _, 0.5, 0.5);
 	for (int iClient = 1; iClient <= MaxClients; iClient++)

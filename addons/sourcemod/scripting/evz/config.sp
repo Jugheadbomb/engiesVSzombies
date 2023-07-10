@@ -235,7 +235,7 @@ KeyValues Config_LoadFile(const char[] configFile)
 	BuildPath(Path_SM, configPath, sizeof(configPath), configFile);
 	if (!FileExists(configPath))
 	{
-		LogMessage("Failed to load config file (file missing): %s!", configPath);
+		SetFailState("Failed to load config file (file missing): %s!", configPath);
 		return null;
 	}
 
@@ -244,7 +244,7 @@ KeyValues Config_LoadFile(const char[] configFile)
 
 	if (!kv.ImportFromFile(configPath))
 	{
-		LogMessage("Failed to parse config file: %s!", configPath);
+		SetFailState("Failed to parse config file: %s!", configPath);
 		delete kv;
 		return null;
 	}

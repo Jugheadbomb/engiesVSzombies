@@ -32,6 +32,7 @@ TFTeam TFTeam_Survivor = TFTeam_Red;
 TFClassType TFClass_Zombie = TFClass_Medic;
 TFClassType TFClass_Survivor = TFClass_Engineer;
 
+ConVar mp_tournament;
 ConVar mp_autoteambalance;
 ConVar mp_scrambleteams_auto;
 ConVar mp_disable_respawn_times;
@@ -116,6 +117,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	mp_tournament = FindConVar("mp_tournament");
 	mp_autoteambalance = FindConVar("mp_autoteambalance");
 	mp_scrambleteams_auto = FindConVar("mp_scrambleteams_auto");
 	mp_disable_respawn_times = FindConVar("mp_disable_respawn_times");
@@ -1104,6 +1106,7 @@ void SetGlow()
 
 void Plugin_Cvars(bool toggle)
 {
+	static bool bTournament;
 	static bool bAutoTeamBalance;
 	static bool bScrambleTeamsAuto;
 	static bool bDisableRespawnTimes;
@@ -1121,6 +1124,9 @@ void Plugin_Cvars(bool toggle)
 	if (toggle && !toggled)
 	{
 		toggled = true;
+
+		bTournament = mp_tournament.BoolValue;
+		mp_tournament.BoolValue = false;
 
 		bAutoTeamBalance = mp_autoteambalance.BoolValue;
 		mp_autoteambalance.BoolValue = false;
@@ -1144,7 +1150,7 @@ void Plugin_Cvars(bool toggle)
 		mp_teams_unbalance_limit.IntValue = 0;
 
 		iWaitingTime = mp_waitingforplayers_time.IntValue;
-		mp_waitingforplayers_time.IntValue = 60;
+		mp_waitingforplayers_time.IntValue = 50;
 
 		flBoostDrainTime = tf_boost_drain_time.FloatValue;
 		tf_boost_drain_time.FloatValue = 50.0;
@@ -1153,6 +1159,7 @@ void Plugin_Cvars(bool toggle)
 	{
 		toggled = false;
 
+		mp_tournament.BoolValue = bTournament;
 		mp_autoteambalance.BoolValue = bAutoTeamBalance;
 		mp_scrambleteams_auto.BoolValue = bScrambleTeamsAuto;
 		mp_disable_respawn_times.BoolValue = bDisableRespawnTimes;

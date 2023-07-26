@@ -1,7 +1,7 @@
 static Handle g_hSDKEquipWearable;
 static Handle g_hSDKSetSpeed;
 static DynamicHook g_DHookShouldTransmit;
-static TFTeam g_nOldClientTeam[TF_MAXPLAYERS];
+static TFTeam g_nOldClientTeam[MAXPLAYERS];
 
 void SDK_Init()
 {

@@ -8,7 +8,7 @@ public bool MoveOrDie_OnStart(BonusRound round)
 
 public Action MoveOrDie_OnPlayerRunCmd(BonusRound round, int iClient, int &iButtons, int &iWeapon)
 {
-	static float flLastDamageTime[TF_MAXPLAYERS];
+	static float flLastDamageTime[MAXPLAYERS];
 
 	float flDamage = round.data.GetFloat("damage");
 	float flInterval = round.data.GetFloat("interval");

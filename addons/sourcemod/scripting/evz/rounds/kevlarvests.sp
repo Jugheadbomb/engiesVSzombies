@@ -1,4 +1,4 @@
-static bool g_bUsedVest[TF_MAXPLAYERS];
+static bool g_bUsedVest[MAXPLAYERS];
 
 public void KevlarVests_OnPlayerSpawn(BonusRound round, int iClient)
 {

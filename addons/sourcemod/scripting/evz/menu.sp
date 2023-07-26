@@ -1,4 +1,4 @@
-static int g_iMenuSelection[TF_MAXPLAYERS];
+static int g_iMenuSelection[MAXPLAYERS];
 
 void Menu_DisplayMain(int iClient)
 {

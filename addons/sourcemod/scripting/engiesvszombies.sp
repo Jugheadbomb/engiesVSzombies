@@ -16,8 +16,6 @@
 #define PLUGIN_VERSION "1.0.0"
 #define PLUGIN_VERSION_REVISION "manual"
 
-#define TF_MAXPLAYERS 34
-
 #define TF_VISION_FILTER_HALLOWEEN (1 << 1)
 #define ATTRIB_VISION 406
 
@@ -57,7 +55,7 @@ enum struct Player
 	bool bWaitingForTeamSwitch;
 }
 
-Player g_Player[TF_MAXPLAYERS];
+Player g_Player[MAXPLAYERS];
 
 enum
 {
@@ -385,7 +383,7 @@ public Action TF2Items_OnGiveNamedItem(int iClient, char[] sClassname, int iInde
 
 public Action OnPlayerRunCmd(int iClient, int &iButtons, int &iImpulse, float vecVelocity[3], float vecAngles[3], int &iWeapon, int &iSubtype, int &iCmdnum, int &iTickcount, int &iSeed, int iMouse[2])
 {
-	static int iJumps[TF_MAXPLAYERS];
+	static int iJumps[MAXPLAYERS];
 	Action action = Plugin_Continue;
 
 	// Double jump
@@ -798,7 +796,7 @@ Action Client_OnTakeDamageAlive(int iVictim, int &iAttacker, int &iInflictor, fl
 
 void Client_WeaponSwitchPost(int iClient, int iWeapon)
 {
-	static int iPreviousWeapon[TF_MAXPLAYERS];
+	static int iPreviousWeapon[MAXPLAYERS];
 
 	Weapon weapon;
 	if (iWeapon > MaxClients && WeaponList.GetByEntity(iWeapon, weapon, Value_Index) && weapon.sAttribSwitch[0])
